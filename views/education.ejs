@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Education Details • Scout Express</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="stylesheet" href="/css/auth.css">
+
+</head>
+<body>
+
+  <header>
+    <a href="/">Home</a>
+  </header>
+
+  <main>
+    <div class="auth-wrapper">
+      <div class="auth-container">
+        <div class="auth-title">Education Details</div>
+
+        <% if (typeof error !== 'undefined' && error) { %>
+          <div class="error"><%= error %></div>
+        <% } %>
+
+        <form id="educationForm" method="POST" action="/education">
+          <!-- EDUCATION ENTRIES -->
+          <div class="auth-section">
+            <div class="auth-section-title">Educational Background</div>
+            <div id="educationEntries">
+<% if (existingEducation && existingEducation.length > 0) { %>
+  <% existingEducation.forEach((edu, index) => { %>
+              <div class="education-entry">
+                <div class="education-entry-header">
+                  <h4>Education <%= index + 1 %></h4>
+                  <button type="button" class="remove-entry" onclick="removeEducationEntry(this)" style="<%= existingEducation.length > 1 ? 'display: block;' : 'display: none;' %>">Remove</button>
+                </div>
+                <div class="auth-grid">
+                  <div class="auth-field">
+                    <label for="degree_<%= index %>">Degree <span class="required">*</span></label>
+                    <input id="degree_<%= index %>" name="education[<%= index %>][degree]" type="text" placeholder="e.g. Bachelor of Science" value="<%= edu.degree || '' %>" required>
+                    <span class="error-message">Please enter degree.</span>
+                  </div>
+
+                  <div class="auth-field">
+                    <label for="institution_<%= index %>">Institution <span class="required">*</span></label>
+                    <input id="institution_<%= index %>" name="education[<%= index %>][institution]" type="text" placeholder="e.g. University Name" value="<%= edu.institution || '' %>" required>
+                    <span class="error-message">Please enter institution.</span>
+                  </div>
+
+                  <div class="auth-field">
+                    <label for="graduation_year_<%= index %>">Graduation Year <span class="required">*</span></label>
+                    <input id="graduation_year_<%= index %>" name="education[<%= index %>][graduation_year]" type="number" min="1900" max="2030" value="<%= edu.graduation_year || '' %>" required>
+                    <span class="error-message">Please enter graduation year.</span>
+                  </div>
+
+                  <div class="auth-field">
+                    <label for="grade_<%= index %>">Grade/Percentage <span class="required">*</span></label>
+                    <input id="grade_<%= index %>" name="education[<%= index %>][grade]" type="text" placeholder="e.g. 85% or A+" value="<%= edu.grade || '' %>" required>
+                    <span class="error-message">Please enter grade.</span>
+                  </div>
+
+
+                </div>
+              </div>
+  <% }); %>
+<% } else { %>
+              <div class="education-entry">
+                <div class="education-entry-header">
+                  <h4>Education 1</h4>
+                  <button type="button" class="remove-entry" style="display: none;">Remove</button>
+                </div>
+                <div class="auth-grid">
+                  <div class="auth-field">
+                    <label for="degree_0">Degree <span class="required">*</span></label>
+                    <input id="degree_0" name="education[0][degree]" type="text" placeholder="e.g. Bachelor of Science" required>
+                    <span class="error-message">Please enter degree.</span>
+                  </div>
+
+                  <div class="auth-field">
+                    <label for="institution_0">Institution <span class="required">*</span></label>
+                    <input id="institution_0" name="education[0][institution]" type="text" placeholder="e.g. University Name" required>
+                    <span class="error-message">Please enter institution.</span>
+                  </div>
+
+                  <div class="auth-field">
+                    <label for="graduation_year_0">Graduation Year <span class="required">*</span></label>
+                    <input id="graduation_year_0" name="education[0][graduation_year]" type="number" min="1900" max="2030" required>
+                    <span class="error-message">Please enter graduation year.</span>
+                  </div>
+
+                  <div class="auth-field">
+                    <label for="grade_0">Grade/Percentage <span class="required">*</span></label>
+                    <input id="grade_0" name="education[0][grade]" type="text" placeholder="e.g. 85% or A+" required>
+                    <span class="error-message">Please enter grade.</span>
+                  </div>
+
+
+                </div>
+              </div>
+<% } %>
+            </div>
+
+            <button type="button" class="add-entry" onclick="addEducationEntry()">+ Add Another Education</button>
+          </div>
+
+          <div class="auth-actions">
+            <button class="btn-primary" type="submit">Continue</button>
+            <div style="margin-top: 1rem;">
+              <a class="forgot-link" href="/work-experience" style="margin-right: 1rem;">Back to Work Experience</a>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+  </main>
+
+  <footer>
+    &copy; 2025 Scout Express. All rights reserved.
+  </footer>
+
+  <script>
+    let educationEntryCount = <%= (typeof existingEducation !== 'undefined' && existingEducation.length > 0) ? existingEducation.length : 1 %>;
+
+
+
+    function addEducationEntry() {
+      const container = document.getElementById('educationEntries');
+      const entryIndex = educationEntryCount++;
+
+      const entryHtml = `
+        <div class="education-entry">
+          <div class="education-entry-header">
+            <h4>Education ${entryIndex + 1}</h4>
+            <button type="button" class="remove-entry" onclick="removeEducationEntry(this)">Remove</button>
+          </div>
+          <div class="auth-grid">
+            <div class="auth-field">
+              <label for="degree_${entryIndex}">Degree <span class="required">*</span></label>
+              <input id="degree_${entryIndex}" name="education[${entryIndex}][degree]" type="text" placeholder="e.g. Bachelor of Science" required>
+              <span class="error-message">Please enter degree.</span>
+            </div>
+
+            <div class="auth-field">
+              <label for="institution_${entryIndex}">Institution <span class="required">*</span></label>
+              <input id="institution_${entryIndex}" name="education[${entryIndex}][institution]" type="text" placeholder="e.g. University Name" required>
+              <span class="error-message">Please enter institution.</span>
+            </div>
+
+            <div class="auth-field">
+              <label for="graduation_year_${entryIndex}">Graduation Year <span class="required">*</span></label>
+              <input id="graduation_year_${entryIndex}" name="education[${entryIndex}][graduation_year]" type="number" min="1900" max="2030" required>
+              <span class="error-message">Please enter graduation year.</span>
+            </div>
+
+            <div class="auth-field">
+              <label for="grade_${entryIndex}">Grade/Percentage <span class="required">*</span></label>
+              <input id="grade_${entryIndex}" name="education[${entryIndex}][grade]" type="text" placeholder="e.g. 85% or A+" required>
+              <span class="error-message">Please enter grade.</span>
+            </div>
+          </div>
+        </div>
+      `;
+
+      container.insertAdjacentHTML('beforeend', entryHtml);
+    }
+
+    function removeEducationEntry(button) {
+      button.closest('.education-entry').remove();
+      educationEntryCount--;
+
+      // Hide remove button if only one entry remains
+      if (educationEntryCount === 1) {
+        const removeButtons = document.querySelectorAll('.remove-entry');
+        removeButtons.forEach(btn => btn.style.display = 'none');
+      }
+    }
+
+
+
+    // Form validation
+    document.getElementById('educationForm').addEventListener('submit', function(e) {
+      let valid = true;
+
+      // Validate all education entries
+      const entries = document.querySelectorAll('.education-entry');
+      entries.forEach((entry, index) => {
+        const degree = entry.querySelector(`[name="education[${index}][degree]"]`);
+        const institution = entry.querySelector(`[name="education[${index}][institution]"]`);
+        const graduationYear = entry.querySelector(`[name="education[${index}][graduation_year]"]`);
+        const grade = entry.querySelector(`[name="education[${index}][grade]"]`);
+
+        // Validate required fields
+        [degree, institution, graduationYear, grade].forEach(field => {
+          if (!field.value.trim()) {
+            field.classList.add('is-invalid');
+            field.nextElementSibling.style.display = 'block';
+            valid = false;
+          } else {
+            field.classList.remove('is-invalid');
+            field.nextElementSibling.style.display = 'none';
+          }
+        });
+      });
+
+      if (!valid) {
+        e.preventDefault();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+    });
+  </script>
+</body>
+</html>

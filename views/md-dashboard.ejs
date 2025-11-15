@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MD Dashboard • Scout Express</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="stylesheet" href="/css/auth.css">
+  <style>
+    .dashboard-container { max-width: 1200px; margin: 0 auto; padding: 2rem; }
+    .dashboard-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; }
+    .dashboard-title { font-size: 2rem; font-weight: bold; }
+    .logout-btn { background: #d93025; color: white; border: none; padding: 0.5rem 1rem; border-radius: 4px; cursor: pointer; }
+    .dashboard-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem; }
+    .dashboard-card { background: white; border: 1px solid #e0e0e0; border-radius: 8px; padding: 1.5rem; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+    .card-title { font-size: 1.25rem; font-weight: bold; margin-bottom: 1rem; }
+    .card-content { color: #666; }
+  </style>
+</head>
+<body>
+  <header>
+    <a href="/">Home</a>
+  </header>
+
+  <main>
+    <div class="dashboard-container">
+      <div class="dashboard-header">
+        <div class="dashboard-title">MD (Analytics) Dashboard</div>
+        <form method="POST" action="/logout" style="display: inline;">
+          <button type="submit" class="logout-btn">Logout</button>
+        </form>
+      </div>
+
+      <div class="dashboard-grid">
+        <div class="dashboard-card">
+          <div class="card-title">Analytics Overview</div>
+          <div class="card-content">View comprehensive analytics and insights.</div>
+        </div>
+        <div class="dashboard-card">
+          <div class="card-title">Reports</div>
+          <div class="card-content">Generate and view detailed reports.</div>
+        </div>
+        <div class="dashboard-card">
+          <div class="card-title">Performance Metrics</div>
+          <div class="card-content">Monitor key performance indicators.</div>
+        </div>
+        <div class="dashboard-card">
+          <div class="card-title">Data Insights</div>
+          <div class="card-content">Explore data trends and patterns.</div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer>
+    &copy; 2025 Scout Express. All rights reserved.
+  </footer>
+</body>
+</html>

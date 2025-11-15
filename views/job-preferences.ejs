@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Job Preferences • Scout Express</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="stylesheet" href="/css/auth.css">
+
+</head>
+<body>
+
+  <header>
+    <a href="/">Home</a>
+  </header>
+
+  <main>
+    <div class="auth-wrapper">
+      <div class="auth-container">
+        <div class="auth-title">Job Preferences</div>
+
+        <% if (typeof error !== 'undefined' && error) { %>
+          <div class="error"><%= error %></div>
+        <% } %>
+
+        <form id="jobPreferencesForm" method="POST" action="/job-preferences">
+          <!-- JOB PREFERENCES -->
+          <div class="auth-section">
+            <div class="auth-section-title">Your Job Preferences</div>
+            <div class="auth-grid">
+              <div class="auth-field">
+                <label for="expected_salary">Expected Salary <span class="required">*</span></label>
+                <input id="expected_salary" name="expected_salary" type="text" placeholder="e.g. 50000 INR per annum" value="<%= (existingPreferences && existingPreferences.expected_salary) || '' %>" required>
+                <span class="error-message">Please enter your expected salary.</span>
+              </div>
+
+              <div class="auth-field">
+                <label for="availability">Availability <span class="required">*</span></label>
+                <select id="availability" name="availability" required>
+                  <option value="">Select availability</option>
+                  <option value="immediately" <%= (existingPreferences && existingPreferences.availability === 'immediately') ? 'selected' : '' %>>Immediately</option>
+                  <option value="within_1_month" <%= (existingPreferences && existingPreferences.availability === 'within_1_month') ? 'selected' : '' %>>Within 1 month</option>
+                  <option value="within_3_months" <%= (existingPreferences && existingPreferences.availability === 'within_3_months') ? 'selected' : '' %>>Within 3 months</option>
+                  <option value="within_6_months" <%= (existingPreferences && existingPreferences.availability === 'within_6_months') ? 'selected' : '' %>>Within 6 months</option>
+                  <option value="not_available" <%= (existingPreferences && existingPreferences.availability === 'not_available') ? 'selected' : '' %>>Not available</option>
+                </select>
+                <span class="error-message">Please select your availability.</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="auth-actions">
+            <button class="btn-primary" type="submit">Complete Registration</button>
+            <div style="margin-top: 1rem;">
+              <a class="forgot-link" href="/skills" style="margin-right: 1rem;">Back to Skills</a>
+              <a class="forgot-link" href="/education" style="margin-right: 1rem;">Back to Education</a>
+              <a class="forgot-link" href="/work-experience">Back to Work Experience</a>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+  </main>
+
+  <footer>
+    &copy; 2025 Scout Express. All rights reserved.
+  </footer>
+
+  <script>
+
+
+    // Form validation
+    document.getElementById('jobPreferencesForm').addEventListener('submit', function(e) {
+      let valid = true;
+
+      // Validate required fields
+      const expectedSalary = document.getElementById('expected_salary');
+      const availability = document.getElementById('availability');
+
+      if (!expectedSalary.value.trim()) {
+        expectedSalary.classList.add('is-invalid');
+        expectedSalary.nextElementSibling.style.display = 'block';
+        valid = false;
+      } else {
+        expectedSalary.classList.remove('is-invalid');
+        expectedSalary.nextElementSibling.style.display = 'none';
+      }
+
+      if (!availability.value) {
+        availability.classList.add('is-invalid');
+        availability.nextElementSibling.style.display = 'block';
+        valid = false;
+      } else {
+        availability.classList.remove('is-invalid');
+        availability.nextElementSibling.style.display = 'none';
+      }
+
+      if (!valid) {
+        e.preventDefault();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+    });
+  </script>
+</body>
+</html>

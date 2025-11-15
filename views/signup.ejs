@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Candidate Registration • Scout Express</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="stylesheet" href="/css/auth.css">
+  <style>
+    .error-message { color: #d93025; font-size: 0.85rem; margin-top: 4px; display: none; }
+    input.is-invalid, select.is-invalid, textarea.is-invalid { border-color: #d93025; }
+  </style>
+</head>
+<body>  
+
+  <header>
+    <a href="/">Home</a>
+  </header>
+
+  <main>
+    <div class="auth-wrapper">
+      <div class="auth-container">
+        <div class="auth-title">Candidate Registration</div>
+
+        <% if (typeof error !== 'undefined' && error) { %>
+          <div class="error"><%= error %></div>
+        <% } %>
+
+        <form id="signupForm" method="POST" action="/signup" enctype="multipart/form-data" novalidate>
+          <!-- PROFILE DETAILS -->
+          <div class="auth-section">
+            <div class="auth-section-title">Profile Details</div>
+            <div class="auth-grid">
+                <div class="auth-field">
+                <label for="name">Full Name <span class="required">*</span></label>
+                <input id="full_name" name="full_name" type="text" placeholder="Enter your full name here" value="<%= existingData.full_name || '' %>" required>
+                <span class="error-message">Please enter your full name here.</span>
+              </div>
+              <div class="auth-field full-width">
+                <label for="photo">Photograph <span class="optional">(optional)</span></label>
+                <input id="photo" name="photo" type="file" accept="image/jpg,image/jpeg,image/png" <%= typeof existingData !== 'undefined' && existingData ? '' : 'required' %>>
+              </div>
+              <p class="field-hint">Upload a clear headshot in JPG or PNG format, up to 2&nbsp;MB.</p>
+
+              <div class="auth-field">
+                <label for="professionalHeadline">Professional Headline <span class="required">*</span></label>
+                <input id="professionalHeadline" name="professional_headline" type="text" placeholder="e.g. Full-stack Developer" value="<%= existingData.professional_headline || '' %>" required>
+                <span class="error-message">Please enter your professional headline.</span>
+              </div>
+
+              <div class="auth-field full-width">
+                <label for="professionalSummary">Professional Summary <span class="required">*</span></label>
+                <textarea id="professionalSummary" name="professional_summary" rows="4" placeholder="Write a short summary of your experience, strengths, and career goals." required><%= existingData.professional_summary || '' %></textarea>
+                <span class="error-message">Please write your professional summary.</span>
+              </div>
+
+
+            </div>
+          </div>
+
+          <!-- LOCATION -->
+          <div class="auth-section">
+            <div class="auth-section-title">Location</div>
+            <div class="auth-grid">
+              <div class="auth-field">
+                <label for="country">Country <span class="required">*</span></label>
+                <select id="country" name="country" data-existing="<%= existingData.country || '' %>" required>
+                  <option value="">Select country</option>
+                </select>
+                <span class="error-message">Please select your country.</span>
+              </div>
+
+              <div class="auth-field">
+                <label for="state">State <span class="required">*</span></label>
+                <select id="state" name="state" data-existing="<%= existingData.state || '' %>" disabled required>
+                  <option value="">Select state</option>
+                </select>
+                <span class="error-message">Please select your state.</span>
+              </div>
+
+              <div class="auth-field">
+                <label for="district">District <span class="required">*</span></label>
+                <input id="district" name="district" type="text" placeholder="Enter your district" value="<%= existingData.district || '' %>" required>
+                <span class="error-message">Please enter your district.</span>
+              </div>
+
+              <div class="auth-field">
+                <label for="city">City <span class="required">*</span></label>
+                <input id="city" name="city" type="text" placeholder="Enter your city" value="<%= existingData.city || '' %>" required>
+                <span class="error-message">Please enter your city.</span>
+              </div>
+
+              <div class="auth-field">
+                <label for="pinCode">PIN Code <span class="required">*</span></label>
+                <input id="pinCode" name="pin_code" type="text" placeholder="Postal / ZIP code" value="<%= existingData.pin_code || '' %>" required>
+                <span class="error-message">Enter a valid 6-digit PIN code.</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Contact DETAILS -->
+          <div class="auth-section">
+            <div class="auth-section-title">Contact Details</div>
+            <div class="auth-grid">
+              <div class="auth-field">
+                <div style="display: flex; align-items: center; margin-bottom: 8px;">
+                  <label for="phoneNumber" style="flex: 1; margin: 0;">
+                    Phone Number <span class="required">*</span>
+                  </label>
+                  <input id="isdCode" name="isd_code" type="text" placeholder="+1" value="<%= existingData.isd_code || '' %>" readonly style="width: 80px;">
+                </div>
+                <input id="phoneNumber" name="phone_number" type="tel" placeholder="e.g. 9876543210" value="<%= existingData.phone_number || '' %>" required style="width: 100%;">
+                <span class="error-message">Enter a valid phone number.</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Login Info -->
+          <div class="auth-section">
+            <div class="auth-section-title">Login info</div>
+            <div class="auth-grid">
+              <div class="auth-field">
+                <label for="email">Email <span class="required">*</span></label>
+                <input id="email" name="email" type="email" placeholder="you@example.com" value="<%= existingData.email || '' %>" required>
+                <span class="error-message">Please enter a valid email address.</span>
+              </div>
+
+              <div class="auth-field">
+                <label for="password">Password <span class="required">*</span></label>
+                <input id="password" name="password" type="password" placeholder="Choose a secure password" minlength="8" required>
+                <span class="error-message">Password must be at least 8 characters long.</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- RESUME -->
+          <div class="auth-section">
+            <div class="auth-section-title">Resume</div>
+            <div class="auth-grid">
+              <div class="auth-field full-width">
+                <label for="resume">Upload Resume <% if (existingData) { %><span class="optional">(optional)</span><% } else { %><span class="required">*</span><% } %></label>
+                <input id="resume" name="resume" type="file" accept="application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document" <% if (!existingData.email) { %> required <% } %>>
+                <span class="error-message">Please upload your resume (PDF or DOC, max 2 MB).</span>
+              </div>
+               <p class="field-hint">Attach your latest resume in PDF or DOC format, up to 2&nbsp;MB.</p>
+            </div>
+          </div>
+
+          <div class="auth-actions">
+            <button class="btn-primary" type="submit">Continue</button>
+            <a class="forgot-link" href="/login">Back to login</a>
+          </div>
+          <div class="create-account">
+            <a class="muted" href="/login">Already have an account? Sign in</a>
+          </div>
+        </form>
+      </div>
+    </div>
+  </main>
+
+  <footer>
+    &copy; 2025 Scout Express. All rights reserved.
+  </footer>
+
+
+  <script src="/js/signup.js"></script>
+</body>
+</html>

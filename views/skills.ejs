@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Skills • Scout Express</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="stylesheet" href="/css/auth.css">
+
+</head>
+<body>
+
+  <header>
+    <a href="/">Home</a>
+  </header>
+
+  <main>
+    <div class="auth-wrapper">
+      <div class="auth-container">
+        <div class="auth-title">Skills</div>
+
+        <% if (typeof error !== 'undefined' && error) { %>
+          <div class="error"><%= error %></div>
+        <% } %>
+
+        <form id="skillsForm" method="POST" action="/skills">
+          <!-- SKILLS -->
+          <div class="auth-section">
+            <div class="auth-section-title">Your Skills</div>
+            <div id="skillsContainer">
+<% if (existingSkills && existingSkills.length > 0) { %>
+  <% existingSkills.forEach((skill, index) => { %>
+              <div class="skill-entry">
+                <input type="text" name="skills[<%= index %>][skill_name]" class="skill-input" placeholder="e.g. JavaScript" value="<%= skill.skill_name || '' %>" required>
+                <span class="error-message">Please enter a skill.</span>
+                <% if (existingSkills.length > 1) { %>
+                <button type="button" class="remove-skill" onclick="removeSkill(this)">Remove</button>
+                <% } %>
+              </div>
+  <% }); %>
+<% } else { %>
+              <div class="skill-entry">
+                <input type="text" name="skills[0][skill_name]" class="skill-input" placeholder="e.g. JavaScript" required>
+                <span class="error-message">Please enter a skill.</span>
+              </div>
+<% } %>
+            </div>
+
+            <button type="button" class="add-skill" onclick="addSkill()">+ Add Another Skill</button>
+          </div>
+
+          <div class="auth-actions">
+            <button class="btn-primary" type="submit">Continue</button>
+            <div style="margin-top: 1rem;">
+              <a class="forgot-link" href="/education" style="margin-right: 1rem;">Back to Education</a>
+              <a class="forgot-link" href="/work-experience">Back to Work Experience</a>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+  </main>
+
+  <footer>
+    &copy; 2025 Scout Express. All rights reserved.
+  </footer>
+
+  <script>
+    let skillCount = <%= (typeof existingSkills !== 'undefined' && existingSkills.length > 0) ? existingSkills.length : 1 %>;
+
+
+
+    function addSkill() {
+      const container = document.getElementById('skillsContainer');
+      const skillIndex = skillCount++;
+
+      const skillHtml = `
+        <div class="skill-entry">
+          <input type="text" name="skills[${skillIndex}][skill_name]" class="skill-input" placeholder="e.g. Python" required>
+          <span class="error-message">Please enter a skill.</span>
+          <button type="button" class="remove-skill" onclick="removeSkill(this)">Remove</button>
+        </div>
+      `;
+
+      container.insertAdjacentHTML('beforeend', skillHtml);
+    }
+
+    function removeSkill(button) {
+      button.closest('.skill-entry').remove();
+      skillCount--;
+    }
+
+    // Form validation
+    document.getElementById('skillsForm').addEventListener('submit', function(e) {
+      let valid = true;
+
+      // Validate all skill inputs
+      const skillInputs = document.querySelectorAll('.skill-input');
+      skillInputs.forEach(input => {
+        if (!input.value.trim()) {
+          input.classList.add('is-invalid');
+          input.nextElementSibling.style.display = 'block';
+          valid = false;
+        } else {
+          input.classList.remove('is-invalid');
+          input.nextElementSibling.style.display = 'none';
+        }
+      });
+
+      if (!valid) {
+        e.preventDefault();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+    });
+  </script>
+</body>
+</html>
