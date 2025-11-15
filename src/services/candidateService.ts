@@ -30,7 +30,7 @@ const updateSchema = z.object({
   city: z.string().min(1, 'City is required'),
   pin_code: z.string().regex(/^[0-9]{6}$/, 'Enter a valid 6-digit PIN code'),
   email: z.string().email('Enter a valid email address'),
-  password: z.string().min(8, 'Password must be at least 8 characters long')
+  password: z.string().min(8, 'Password must be at least 8 characters long').optional()
 });
 
 export class ServiceError extends Error {
@@ -72,7 +72,7 @@ export async function registerCandidate(payload: unknown, files: SignupFiles): P
 
   const photoFile = files?.photo?.[0] ?? null;
 
-  const hashedPassword = await bcrypt.hash(result.data.password, 10);
+    const hashedPassword = await bcrypt.hash(result.data.password, 10);
 
   const sql = `
     INSERT INTO candidates
@@ -106,7 +106,7 @@ export async function updateCandidate(candidateId: number, payload: unknown, fil
     throw new ServiceError(500, 'Database connection unavailable. Please try again later.');
   }
 
-  const result = signupSchema.safeParse(payload);
+  const result = updateSchema.safeParse(payload);
   if (!result.success) {
     const errorMsg = result.error.issues.map((issue) => issue.message).join('<br>');
     throw new ServiceError(400, errorMsg);
@@ -115,7 +115,10 @@ export async function updateCandidate(candidateId: number, payload: unknown, fil
   const resumeFile = files?.resume?.[0];
   const photoFile = files?.photo?.[0];
 
-  const hashedPassword = await bcrypt.hash(result.data.password, 10);
+  let hashedPassword: string | null = null;
+  if (result.data.password) {
+    hashedPassword = await bcrypt.hash(result.data.password, 10);
+  }
 
   const updateFields = [
     'full_name = ?',
@@ -128,8 +131,7 @@ export async function updateCandidate(candidateId: number, payload: unknown, fil
     'country = ?',
     'pin_code = ?',
     'email = ?',
-    'password = ?'
-  ];
+   ];
 
   const values: (string | number)[] = [
     result.data.full_name,
@@ -141,9 +143,13 @@ export async function updateCandidate(candidateId: number, payload: unknown, fil
     result.data.district,
     result.data.country,
     result.data.pin_code,
-    result.data.email,
-    hashedPassword
+    result.data.email
   ];
+
+  if (hashedPassword) {
+    updateFields.push('password = ?');
+    values.push(hashedPassword);
+  }
 
   if (photoFile) {
     updateFields.push('photo = ?');

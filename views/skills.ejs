@@ -66,52 +66,9 @@
   </footer>
 
   <script>
-    let skillCount = <%= (typeof existingSkills !== 'undefined' && existingSkills.length > 0) ? existingSkills.length : 1 %>;
-
-
-
-    function addSkill() {
-      const container = document.getElementById('skillsContainer');
-      const skillIndex = skillCount++;
-
-      const skillHtml = `
-        <div class="skill-entry">
-          <input type="text" name="skills[${skillIndex}][skill_name]" class="skill-input" placeholder="e.g. Python" required>
-          <span class="error-message">Please enter a skill.</span>
-          <button type="button" class="remove-skill" onclick="removeSkill(this)">Remove</button>
-        </div>
-      `;
-
-      container.insertAdjacentHTML('beforeend', skillHtml);
-    }
-
-    function removeSkill(button) {
-      button.closest('.skill-entry').remove();
-      skillCount--;
-    }
-
-    // Form validation
-    document.getElementById('skillsForm').addEventListener('submit', function(e) {
-      let valid = true;
-
-      // Validate all skill inputs
-      const skillInputs = document.querySelectorAll('.skill-input');
-      skillInputs.forEach(input => {
-        if (!input.value.trim()) {
-          input.classList.add('is-invalid');
-          input.nextElementSibling.style.display = 'block';
-          valid = false;
-        } else {
-          input.classList.remove('is-invalid');
-          input.nextElementSibling.style.display = 'none';
-        }
-      });
-
-      if (!valid) {
-        e.preventDefault();
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-      }
-    });
+    // Pass existing skills data to external script
+    window.existingSkills = <%- JSON.stringify(typeof existingSkills !== 'undefined' ? existingSkills : []) %>;
   </script>
+  <script src="/js/skills.js"></script>
 </body>
 </html>

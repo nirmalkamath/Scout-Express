@@ -1,0 +1,7 @@
+.error-message { color: #d93025; font-size: 0.85rem; margin-top: 4px; display: none; }
+input.is-invalid, select.is-invalid, textarea.is-invalid { border-color: #d93025; }
+.work-entry { border: 1px solid #e0e0e0; border-radius: 8px; padding: 1rem; margin-bottom: 1rem; }
+.work-entry-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; }
+.remove-entry { background: #d93025; color: white; border: none; padding: 0.5rem 1rem; border-radius: 4px; cursor: pointer; }
+.add-entry { background: #1a73e8; color: white; border: none; padding: 0.75rem 1.5rem; border-radius: 4px; cursor: pointer; margin-top: 1rem; }
+.btn-secondary { background: #388e3c; color: white; border: none; padding: 0.75rem 1.5rem; border-radius: 4px; cursor: pointer; margin-left: 1rem; }

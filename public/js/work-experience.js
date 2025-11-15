@@ -1,7 +1,53 @@
 document.addEventListener('DOMContentLoaded', function () {
   const workExperienceForm = document.getElementById('workExperienceForm');
   const workEntries = document.getElementById('workEntries');
-  let entryCount = document.querySelectorAll('.work-entry').length;
+  let entryCount = document.querySelectorAll('.work-entry').length || (window.existingExperience && window.existingExperience.length > 0 ? window.existingExperience.length : 1);
+
+  // Populate existing experience data
+  if (window.existingExperience && window.existingExperience.length > 0) {
+    window.existingExperience.forEach((exp, index) => {
+      if (index === 0) {
+        // Populate first entry
+        const companyEl = document.getElementById('company_0');
+        const positionEl = document.getElementById('position_0');
+        const startDateEl = document.getElementById('start_date_0');
+        const endDateEl = document.getElementById('end_date_0');
+        const descriptionEl = document.getElementById('description_0');
+        const currentlyWorkingEl = document.getElementById('currently_working_0');
+
+        if (companyEl) companyEl.value = exp.company || '';
+        if (positionEl) positionEl.value = exp.position || '';
+        if (startDateEl) startDateEl.value = exp.start_date || '';
+        if (endDateEl) endDateEl.value = exp.end_date || '';
+        if (descriptionEl) descriptionEl.value = exp.description || '';
+        if (currentlyWorkingEl && exp.currently_working === 'on') {
+          currentlyWorkingEl.checked = true;
+          if (endDateEl) endDateEl.disabled = true;
+        }
+      } else {
+        // Add and populate additional entries
+        //addWorkEntry();
+        setTimeout(() => {
+          const companyEl = document.getElementById(`company_${index}`);
+          const positionEl = document.getElementById(`position_${index}`);
+          const startDateEl = document.getElementById(`start_date_${index}`);
+          const endDateEl = document.getElementById(`end_date_${index}`);
+          const descriptionEl = document.getElementById(`description_${index}`);
+          const currentlyWorkingEl = document.getElementById(`currently_working_${index}`);
+
+          if (companyEl) companyEl.value = exp.company || '';
+          if (positionEl) positionEl.value = exp.position || '';
+          if (startDateEl) startDateEl.value = exp.start_date || '';
+          if (endDateEl) endDateEl.value = exp.end_date || '';
+          if (descriptionEl) descriptionEl.value = exp.description || '';
+          if (currentlyWorkingEl && exp.currently_working === 'on') {
+            currentlyWorkingEl.checked = true;
+            if (endDateEl) endDateEl.disabled = true;
+          }
+        }, 100);
+      }
+    });
+  }
 
   function toggleEndDate(index) {
     const endDate = document.getElementById(`end_date_${index}`);
@@ -44,16 +90,17 @@ document.addEventListener('DOMContentLoaded', function () {
           <input id="end_date_${entryIndex}" name="work_experience[${entryIndex}][end_date]" type="date">
           <span class="error-message">End date cannot be before start date.</span>
         </div>
-        <div class="auth-field full-width">
-          <label>
-            <input id="currently_working_${entryIndex}" name="work_experience[${entryIndex}][currently_working]" type="checkbox" value="on">
-            I currently work here
-          </label>
-        </div>
+       
         <div class="auth-field full-width">
           <label for="description_${entryIndex}">Job Description <span class="required">*</span></label>
           <textarea id="description_${entryIndex}" name="work_experience[${entryIndex}][description]" rows="3" placeholder="Describe your responsibilities and achievements." required></textarea>
           <span class="error-message">Please provide job description.</span>
+        </div>
+         <div>
+          <label>
+            <strong>I currently work here </strong><input id="currently_working_${entryIndex}" name="work_experience[${entryIndex}][currently_working]" type="checkbox" value="on">
+            
+          </label>
         </div>
       </div>
     `;
@@ -149,3 +196,18 @@ document.addEventListener('DOMContentLoaded', function () {
   // Initially hide remove button for first entry
   updateEntryHeaders();
 });
+
+ function removeWorkEntry(button) {
+      button.closest('.work-entry').remove();
+      entryCount--;
+
+      // Hide remove button if only one entry remains
+      if (entryCount === 1) {
+        const removeButtons = document.querySelectorAll('.remove-entry');
+        removeButtons.forEach(btn => btn.style.display = 'none');
+      }
+    }
+
+function skipWorkExperience() {
+      window.location.href = '/education';
+}

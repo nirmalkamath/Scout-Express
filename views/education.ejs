@@ -29,7 +29,7 @@
             <div class="auth-section-title">Educational Background</div>
             <div id="educationEntries">
 <% if (existingEducation && existingEducation.length > 0) { %>
-  <% existingEducation.forEach((edu, index) => { %>
+  <% existingEducation.reverse().forEach((edu, index) => { %>
               <div class="education-entry">
                 <div class="education-entry-header">
                   <h4>Education <%= index + 1 %></h4>
@@ -94,8 +94,6 @@
                     <input id="grade_0" name="education[0][grade]" type="text" placeholder="e.g. 85% or A+" required>
                     <span class="error-message">Please enter grade.</span>
                   </div>
-
-
                 </div>
               </div>
 <% } %>
@@ -120,94 +118,9 @@
   </footer>
 
   <script>
-    let educationEntryCount = <%= (typeof existingEducation !== 'undefined' && existingEducation.length > 0) ? existingEducation.length : 1 %>;
-
-
-
-    function addEducationEntry() {
-      const container = document.getElementById('educationEntries');
-      const entryIndex = educationEntryCount++;
-
-      const entryHtml = `
-        <div class="education-entry">
-          <div class="education-entry-header">
-            <h4>Education ${entryIndex + 1}</h4>
-            <button type="button" class="remove-entry" onclick="removeEducationEntry(this)">Remove</button>
-          </div>
-          <div class="auth-grid">
-            <div class="auth-field">
-              <label for="degree_${entryIndex}">Degree <span class="required">*</span></label>
-              <input id="degree_${entryIndex}" name="education[${entryIndex}][degree]" type="text" placeholder="e.g. Bachelor of Science" required>
-              <span class="error-message">Please enter degree.</span>
-            </div>
-
-            <div class="auth-field">
-              <label for="institution_${entryIndex}">Institution <span class="required">*</span></label>
-              <input id="institution_${entryIndex}" name="education[${entryIndex}][institution]" type="text" placeholder="e.g. University Name" required>
-              <span class="error-message">Please enter institution.</span>
-            </div>
-
-            <div class="auth-field">
-              <label for="graduation_year_${entryIndex}">Graduation Year <span class="required">*</span></label>
-              <input id="graduation_year_${entryIndex}" name="education[${entryIndex}][graduation_year]" type="number" min="1900" max="2030" required>
-              <span class="error-message">Please enter graduation year.</span>
-            </div>
-
-            <div class="auth-field">
-              <label for="grade_${entryIndex}">Grade/Percentage <span class="required">*</span></label>
-              <input id="grade_${entryIndex}" name="education[${entryIndex}][grade]" type="text" placeholder="e.g. 85% or A+" required>
-              <span class="error-message">Please enter grade.</span>
-            </div>
-          </div>
-        </div>
-      `;
-
-      container.insertAdjacentHTML('beforeend', entryHtml);
-    }
-
-    function removeEducationEntry(button) {
-      button.closest('.education-entry').remove();
-      educationEntryCount--;
-
-      // Hide remove button if only one entry remains
-      if (educationEntryCount === 1) {
-        const removeButtons = document.querySelectorAll('.remove-entry');
-        removeButtons.forEach(btn => btn.style.display = 'none');
-      }
-    }
-
-
-
-    // Form validation
-    document.getElementById('educationForm').addEventListener('submit', function(e) {
-      let valid = true;
-
-      // Validate all education entries
-      const entries = document.querySelectorAll('.education-entry');
-      entries.forEach((entry, index) => {
-        const degree = entry.querySelector(`[name="education[${index}][degree]"]`);
-        const institution = entry.querySelector(`[name="education[${index}][institution]"]`);
-        const graduationYear = entry.querySelector(`[name="education[${index}][graduation_year]"]`);
-        const grade = entry.querySelector(`[name="education[${index}][grade]"]`);
-
-        // Validate required fields
-        [degree, institution, graduationYear, grade].forEach(field => {
-          if (!field.value.trim()) {
-            field.classList.add('is-invalid');
-            field.nextElementSibling.style.display = 'block';
-            valid = false;
-          } else {
-            field.classList.remove('is-invalid');
-            field.nextElementSibling.style.display = 'none';
-          }
-        });
-      });
-
-      if (!valid) {
-        e.preventDefault();
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-      }
-    });
+    // Pass existing education data to external script
+    window.existingEducation = <%- JSON.stringify(typeof existingEducation !== 'undefined' ? existingEducation : []) %>;
   </script>
+  <script src="/js/education.js"></script>
 </body>
 </html>

@@ -19,19 +19,32 @@ export function renderLogin(req: Request, res: Response): void {
  */
 export async function renderSignup(req: Request, res: Response): Promise<void> {
   let existingData: any = {};
-  const candidateId = req.session.candidateId;
+  const candidateId = req.session.candidateId || null;
 
   if (candidateId) {
     try {
       const [rows] = await mysqlPool.execute(
-        'SELECT full_name, professional_headline, professional_summary, phone_number, country, state, district, city, pin_code, email FROM candidates WHERE id = ?',
+        `SELECT 
+          full_name, 
+          professional_headline, 
+          professional_summary, 
+          phone_number, 
+          country, 
+          state, 
+          district, 
+          city, 
+          pin_code, 
+          email,
+          resume
+        FROM candidates 
+        WHERE id = ?`,
         [candidateId]
       );
 
       if ((rows as any[]).length > 0) {
         existingData = (rows as any[])[0];
 
-        // Split ISD code out of the stored phone number
+        // Extract ISD code if phone number contains it
         if (existingData.phone_number && existingData.phone_number.length > 10) {
           existingData.isd_code = existingData.phone_number.slice(
             0,
@@ -45,7 +58,13 @@ export async function renderSignup(req: Request, res: Response): Promise<void> {
     }
   }
 
-  res.render('signup', { existingData });
+  const hasResume = Boolean(existingData.resume);
+
+  res.render('signup', {
+    existingData,
+    candidateId,
+    hasResume
+  });
 }
 
 /**
@@ -54,11 +73,7 @@ export async function renderSignup(req: Request, res: Response): Promise<void> {
  * --------------------------
  */
 export async function handleAdminLogin(req: Request, res: Response): Promise<void> {
-  const { username, password, loginType } = req.body as {
-    username?: string;
-    password?: string;
-    loginType?: string;
-  };
+  const { username, password, loginType } = req.body;
 
   if (!username || !password) {
     return res.status(400).render('admin-login', {
@@ -85,21 +100,17 @@ export async function handleAdminLogin(req: Request, res: Response): Promise<voi
       });
     }
 
-    // Set session values
     req.session.userType = loginType;
     req.session.userId = authResult.user.id;
 
     req.session.save(err => {
       if (err) {
-        console.error('Session save error:', err);
         return res.status(500).render('admin-login', {
           error: 'Session error. Please try again.'
         });
       }
 
-      const redirectPath =
-        loginType === 'admin' ? '/admin-dashboard' : '/md-dashboard';
-
+      const redirectPath = loginType === 'admin' ? '/admin-dashboard' : '/md-dashboard';
       res.redirect(redirectPath);
     });
   } catch (error) {
@@ -112,22 +123,18 @@ export async function handleAdminLogin(req: Request, res: Response): Promise<voi
 
 /**
  * --------------------------
- * GENERAL LOGIN (Candidates, Others)
+ * GENERAL LOGIN
  * --------------------------
  */
 export async function handleLogin(req: Request, res: Response): Promise<void> {
-  const { email, username, password, loginType } = req.body as {
-    email?: string;
-    username?: string;
-    password?: string;
-    loginType?: string;
-  };
+  const { email, username, password, loginType } = req.body;
 
   const credential = loginType === 'admin' || loginType === 'md' ? username : email;
 
   if (!credential || !password) {
     const view = loginType === 'admin' || loginType === 'md' ? 'admin-login' : 'login';
     const fieldName = loginType === 'admin' || loginType === 'md' ? 'username' : 'email';
+
     return res.status(400).render(view, {
       error: `Please enter ${fieldName} and password.`
     });
@@ -146,6 +153,7 @@ export async function handleLogin(req: Request, res: Response): Promise<void> {
       req.session.userType = 'admin';
       req.session.userId = user.id;
       redirectPath = '/admin-dashboard';
+
     } else if (loginType === 'md') {
       const result = await authenticateMD(username!, password);
       if (!result.valid || !result.user) {
@@ -155,21 +163,18 @@ export async function handleLogin(req: Request, res: Response): Promise<void> {
       req.session.userType = 'md';
       req.session.userId = user.id;
       redirectPath = '/md-dashboard';
+
     } else {
-      // General user login
       const result = authenticateUser(email, password);
       if (!result.valid) {
         return res.status(400).render('login', { error: result.error });
       }
       req.session.userType = loginType;
-      // Add custom logic if needed later
     }
 
     req.session.save(err => {
       if (err) {
-        console.error('Session save error:', err);
-        const view =
-          loginType === 'admin' || loginType === 'md' ? 'admin-login' : 'login';
+        const view = loginType === 'admin' || loginType === 'md' ? 'admin-login' : 'login';
         return res.status(500).render(view, {
           error: 'Session error. Please try again.'
         });
@@ -177,10 +182,10 @@ export async function handleLogin(req: Request, res: Response): Promise<void> {
 
       res.redirect(redirectPath);
     });
+
   } catch (error) {
     console.error('Login failed:', error);
-    const view =
-      loginType === 'admin' || loginType === 'md' ? 'admin-login' : 'login';
+    const view = loginType === 'admin' || loginType === 'md' ? 'admin-login' : 'login';
     res.status(500).render(view, { error: 'Login failed. Please try again.' });
   }
 }
@@ -190,35 +195,48 @@ export async function handleLogin(req: Request, res: Response): Promise<void> {
  * SIGNUP & CANDIDATE UPDATE
  * --------------------------
  */
-
 export async function handleSignup(req: Request, res: Response): Promise<void> {
+  let candidateId = req.session.candidateId || null;
+  let existingData: any = req.body || {};
+
   try {
-    let candidateId = req.session.candidateId;
     if (candidateId) {
-      // Update existing candidate
       await updateCandidate(candidateId, req.body, req.files as SignupFiles);
     } else {
-      // Register new candidate
       candidateId = await registerCandidate(req.body, req.files as SignupFiles);
       req.session.candidateId = candidateId;
     }
-    req.session.save((err) => {
+
+    req.session.save(err => {
       if (err) {
-        console.error('Session save error:', err);
-        res.status(500).render('signup', { error: 'Session error. Please try again.' });
-        return;
+        return res.status(500).render('signup', {
+          error: 'Session error. Please try again.',
+          existingData,
+          candidateId,
+          hasResume: false
+        });
       }
+
       res.redirect('/work-experience?success=1');
     });
-  } catch (error) {
+
+  } catch (error: any) {
+    console.error('Signup failed:', error);
+
     if (error instanceof ServiceError) {
-      res.status(error.statusCode).render('signup', { error: error.message });
-      return;
+      return res.status(error.statusCode).render('signup', {
+        error: error.message,
+        existingData,
+        candidateId,
+        hasResume: false
+      });
     }
 
-    console.error('Signup failed:', error);
     res.status(500).render('signup', {
-      error: 'Something went wrong while processing your signup. Please try again later.'
+      error: 'Something went wrong while processing your signup. Please try again later.',
+      existingData,
+      candidateId,
+      hasResume: false
     });
   }
 }

@@ -6,15 +6,7 @@
   <title>Work Experience • Scout Express</title>
   <link rel="stylesheet" href="/css/style.css">
   <link rel="stylesheet" href="/css/auth.css">
-  <style>
-    .error-message { color: #d93025; font-size: 0.85rem; margin-top: 4px; display: none; }
-    input.is-invalid, select.is-invalid, textarea.is-invalid { border-color: #d93025; }
-    .work-entry { border: 1px solid #e0e0e0; border-radius: 8px; padding: 1rem; margin-bottom: 1rem; }
-    .work-entry-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; }
-    .remove-entry { background: #d93025; color: white; border: none; padding: 0.5rem 1rem; border-radius: 4px; cursor: pointer; }
-    .add-entry { background: #1a73e8; color: white; border: none; padding: 0.75rem 1.5rem; border-radius: 4px; cursor: pointer; margin-top: 1rem; }
-    .btn-secondary { background: #388e3c; color: white; border: none; padding: 0.75rem 1.5rem; border-radius: 4px; cursor: pointer; margin-left: 1rem; }
-  </style>
+  <link rel="stylesheet" href="/css/work-experience.css">
 </head>
 <body>
 
@@ -124,7 +116,7 @@
                     <span class="error-message">Please provide job description.</span>
                   </div>
 
-                  <div class="">
+                  <div>
                     <label for="currently_working_0">
                       <strong>I currently work here</strong>
                       <input id="currently_working_0" name="work_experience[0][currently_working]" type="checkbox" value="on" onchange="toggleEndDate(0)">
@@ -155,174 +147,9 @@
   </footer>
 
   <script>
-    let entryCount = <%= (typeof existingExperience !== 'undefined' && existingExperience.length > 0) ? existingExperience.length : 1 %>;
-
-    // Populate existing experience data
-    <% if (typeof existingExperience !== 'undefined' && existingExperience.length > 0) { %>
-      document.addEventListener('DOMContentLoaded', function() {
-        <% existingExperience.forEach((exp, index) => { %>
-          if (<%= index %> === 0) {
-            // Populate first entry
-            document.getElementById('company_0').value = '<%= exp.company.replace(/'/g, "\\'") %>';
-            document.getElementById('position_0').value = '<%= exp.position.replace(/'/g, "\\'") %>';
-            document.getElementById('start_date_0').value = '<%= exp.start_date %>';
-            document.getElementById('end_date_0').value = '<%= exp.end_date %>';
-            document.getElementById('description_0').value = '<%= exp.description.replace(/'/g, "\\'").replace(/\n/g, '\\n') %>';
-            <% if (exp.currently_working === 'on') { %>
-              document.getElementById('currently_working_0').checked = true;
-              document.getElementById('end_date_0').disabled = true;
-            <% } %>
-          } else {
-            // Add and populate additional entries
-            //addWorkEntry();
-            const newIndex = <%= index %> - 1;
-            setTimeout(() => {
-              document.getElementById('company_<%= index %>').value = '<%= exp.company.replace(/'/g, "\\'") %>';
-              document.getElementById('position_<%= index %>').value = '<%= exp.position.replace(/'/g, "\\'") %>';
-              document.getElementById('start_date_<%= index %>').value = '<%= exp.start_date %>';
-              document.getElementById('end_date_<%= index %>').value = '<%= exp.end_date %>';
-              document.getElementById('description_<%= index %>').value = '<%= exp.description.replace(/'/g, "\\'").replace(/\n/g, '\\n') %>';
-              <% if (exp.currently_working === 'on') { %>
-                document.getElementById('currently_working_<%= index %>').checked = true;
-                document.getElementById('end_date_<%= index %>').disabled = true;
-              <% } %>
-            }, 100);
-          }
-        <% }); %>
-      });
-    <% } %>
-
-    function addWorkEntry() {
-      const container = document.getElementById('workEntries');
-      const entryIndex = entryCount++;
-
-      const entryHtml = `
-        <div class="work-entry">
-          <div class="work-entry-header">
-            <h4>Work Experience ${entryIndex + 1}</h4>
-            <button type="button" class="remove-entry" onclick="removeWorkEntry(this)">Remove</button>
-          </div>
-          <div class="auth-grid">
-            <div class="auth-field">
-              <label for="company_${entryIndex}">Company Name <span class="required">*</span></label>
-              <input id="company_${entryIndex}" name="work_experience[${entryIndex}][company]" type="text" placeholder="e.g. Google Inc." required>
-              <span class="error-message">Please enter company name.</span>
-            </div>
-
-            <div class="auth-field">
-              <label for="position_${entryIndex}">Position/Title <span class="required">*</span></label>
-              <input id="position_${entryIndex}" name="work_experience[${entryIndex}][position]" type="text" placeholder="e.g. Software Engineer" required>
-              <span class="error-message">Please enter your position.</span>
-            </div>
-
-            <div class="auth-field">
-              <label for="start_date_${entryIndex}">Start Date <span class="required">*</span></label>
-              <input id="start_date_${entryIndex}" name="work_experience[${entryIndex}][start_date]" type="date" required>
-              <span class="error-message">Please select start date.</span>
-            </div>
-
-            <div class="auth-field">
-              <label for="end_date_${entryIndex}">End Date</label>
-              <input id="end_date_${entryIndex}" name="work_experience[${entryIndex}][end_date]" type="date">
-              <span class="error-message">End date cannot be before start date.</span>
-            </div>
-
-            <div class="auth-field full-width">
-              <label for="description_${entryIndex}">Job Description <span class="required">*</span></label>
-              <textarea id="description_${entryIndex}" name="work_experience[${entryIndex}][description]" rows="3" placeholder="Describe your key responsibilities and achievements..." required></textarea>
-              <span class="error-message">Please provide job description.</span>
-            </div>
-
-            <div class="auth-field">
-              <label for="currently_working_${entryIndex}">
-                <input id="currently_working_${entryIndex}" name="work_experience[${entryIndex}][currently_working]" type="checkbox" onchange="toggleEndDate(${entryIndex})">
-                I currently work here
-              </label>
-            </div>
-          </div>
-        </div>
-      `;
-
-      container.insertAdjacentHTML('beforeend', entryHtml);
-    }
-
-    function removeWorkEntry(button) {
-      button.closest('.work-entry').remove();
-      entryCount--;
-
-      // Hide remove button if only one entry remains
-      if (entryCount === 1) {
-        const removeButtons = document.querySelectorAll('.remove-entry');
-        removeButtons.forEach(btn => btn.style.display = 'none');
-      }
-    }
-
-    function toggleEndDate(index) {
-      const checkbox = document.getElementById(`currently_working_${index}`);
-      const endDateInput = document.getElementById(`end_date_${index}`);
-
-      if (checkbox.checked) {
-        endDateInput.value = '';
-        endDateInput.disabled = true;
-        endDateInput.required = false;
-      } else {
-        endDateInput.disabled = false;
-        endDateInput.required = true;
-      }
-    }
-
-    // Form validation
-    document.getElementById('workExperienceForm').addEventListener('submit', function(e) {
-      let valid = true;
-
-      // Validate all work entries
-      const entries = document.querySelectorAll('.work-entry');
-      entries.forEach((entry, index) => {
-        const company = entry.querySelector(`[name="work_experience[${index}][company]"]`);
-        const position = entry.querySelector(`[name="work_experience[${index}][position]"]`);
-        const startDate = entry.querySelector(`[name="work_experience[${index}][start_date]"]`);
-        const endDate = entry.querySelector(`[name="work_experience[${index}][end_date]"]`);
-        const description = entry.querySelector(`[name="work_experience[${index}][description]"]`);
-        const currentlyWorking = entry.querySelector(`[name="work_experience[${index}][currently_working]"]`);
-
-        // Validate required fields
-        [company, position, startDate, description].forEach(field => {
-          if (!field.value.trim()) {
-            field.classList.add('is-invalid');
-            field.nextElementSibling.style.display = 'block';
-            valid = false;
-          } else {
-            field.classList.remove('is-invalid');
-            field.nextElementSibling.style.display = 'none';
-          }
-        });
-
-        // Validate date logic
-        if (startDate.value && endDate.value && !currentlyWorking.checked) {
-          if (new Date(startDate.value) > new Date(endDate.value)) {
-            endDate.classList.add('is-invalid');
-            endDate.nextElementSibling.style.display = 'block';
-            valid = false;
-          } else {
-            endDate.classList.remove('is-invalid');
-            endDate.nextElementSibling.style.display = 'none';
-          }
-        }
-      });
-
-      if (!valid) {
-        e.preventDefault();
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-      }
-    });
-
-    function skipWorkExperience() {
-      window.location.href = '/education';
-    }
-
-
+    // Pass existing experience data to external script
+    window.existingExperience = <%- JSON.stringify(typeof existingExperience !== 'undefined' ? existingExperience : []) %>;
   </script>
+  <script src="/js/work-experience.js"></script>
 </body>
-</html></content>
-</xai:function_call">Write">
-<parameter name="file_path">c:\Scout-Express\src\controllers\workExperienceController.ts
+</html>

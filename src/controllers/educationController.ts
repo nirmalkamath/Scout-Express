@@ -17,7 +17,7 @@ export async function renderEducation(req: Request, res: Response): Promise<void
   if (candidateId) {
     try {
       const [rows] = await mysqlPool.execute(
-        'SELECT degree, institution, graduation_year, grade FROM candidate_education WHERE candidate_id = ? ORDER BY graduation_year DESC',
+        'SELECT degree, institution, graduation_year, grade FROM candidate_education WHERE candidate_id = ? ORDER BY graduation_year ASC',
         [candidateId]
       );
       existingEducation = (rows as any[]).map(edu => ({

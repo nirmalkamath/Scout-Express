@@ -1,3 +1,4 @@
+// signup.js — improved validation aware of edit / resume state
 document.addEventListener('DOMContentLoaded', function () {
   const signupForm = document.getElementById('signupForm');
   const countrySelect = document.getElementById('country');
@@ -5,8 +6,7 @@ document.addEventListener('DOMContentLoaded', function () {
   const districtSelect = document.getElementById('district');
   const citySelect = document.getElementById('city');
 
-
-
+  // helper: remove options and set placeholder
   function resetSelect(select, placeholder, disabled = true) {
     if (!select) return;
     select.innerHTML = '';
@@ -59,17 +59,14 @@ document.addEventListener('DOMContentLoaded', function () {
 
       const data = await response.json();
       if (data && data.length > 0) {
-        // Find the correct ISD code - for countries with multiple entries, find the most common one
         let isdCode = '';
 
         if (country.toLowerCase() === 'india') {
-          // For India, specifically look for +91
           const indiaEntry = data.find(item => item.idd && item.idd.root === '+9' && item.idd.suffixes && item.idd.suffixes.includes('1'));
           if (indiaEntry) {
             isdCode = indiaEntry.idd.root + indiaEntry.idd.suffixes[0];
           }
         } else {
-          // For other countries, take the first valid entry
           const validEntry = data.find(item => item.idd && item.idd.root && item.idd.suffixes);
           if (validEntry) {
             isdCode = validEntry.idd.root + (validEntry.idd.suffixes[0] || '');
@@ -136,36 +133,94 @@ document.addEventListener('DOMContentLoaded', function () {
     });
   }
 
+  // ---- Validation logic below ----
 
+  // Read server-provided flags (server must set these in EJS)
+  // window.candidateId should be a string or null
+  // window.hasResume should be true/false (or 'true'/'false')
+  const isReturningCandidate = !!(window.candidateId || window.hasResume === true || window.hasResume === 'true');
+
+  // Utility helpers for errors
+  function showError(el, message) {
+    if (!el) return;
+    el.classList.add('is-invalid');
+    const msg = el.nextElementSibling;
+    if (msg) {
+      msg.textContent = message;
+      msg.style.display = 'block';
+    }
+  }
+
+  function hideError(el) {
+    if (!el) return;
+    el.classList.remove('is-invalid');
+    const msg = el.nextElementSibling;
+    if (msg) msg.style.display = 'none';
+  }
+
+  // Cleanup initial invalid state for fields that should be optional on edit
+  (function cleanupInitialInvalidState() {
+    try {
+      // If returning candidate, ensure resume/password not visually invalid by default
+      if (isReturningCandidate) {
+        const resumeEl = document.getElementById('resume');
+        if (resumeEl) {
+          resumeEl.classList.remove('is-invalid');
+          const m = resumeEl.nextElementSibling;
+          if (m) m.style.display = 'none';
+          resumeEl.required = false;
+        }
+        const passwordEl = document.getElementById('password');
+        if (passwordEl) {
+          passwordEl.classList.remove('is-invalid');
+          const m2 = passwordEl.nextElementSibling;
+          if (m2) m2.style.display = 'none';
+          passwordEl.required = false;
+        }
+      }
+    } catch (err) {
+      // ignore
+      console.warn('cleanupInitialInvalidState failed', err);
+    }
+  })();
 
   if (signupForm) {
     signupForm.addEventListener('submit', function (e) {
       let valid = true;
 
+      // Define validation rules dynamically
       const fields = [
-        { id: 'full_name' },
-        { id: 'professionalHeadline' },
-        { id: 'professionalSummary' },
-        { id: 'phoneNumber', pattern: /^[0-9]{10}$/ },
-        { id: 'country' },
-        { id: 'state' },
-        { id: 'district' },
-        { id: 'city' },
-        { id: 'pinCode', pattern: /^[0-9]{6}$/ },
-        { id: 'email', pattern: /^[^\s@]+@[^\s@]+\.[^\s@]+$/ },
-        { id: 'password', min: 8 },
-        { id: 'resume' },
+        { id: 'full_name', required: true },
+        { id: 'professionalHeadline', required: true },
+        { id: 'professionalSummary', required: true },
+        { id: 'phoneNumber', required: true, pattern: /^[0-9]{10}$/ },
+        { id: 'country', required: true },
+        { id: 'state', required: true },
+        { id: 'district', required: true },
+        { id: 'city', required: true },
+        { id: 'pinCode', required: true, pattern: /^[0-9]{6}$/ },
+        { id: 'email', required: true, pattern: /^[^\s@]+@[^\s@]+\.[^\s@]+$/ }
       ];
 
+      // Password rules: required for new users, optional for returning
+      fields.push({ id: 'password', required: !isReturningCandidate, min: 8 });
+
+      // Resume rules: required for NEW users who don't already have a resume (server sets hasResume)
+      const hasResumeFlag = (window.hasResume === true || window.hasResume === 'true');
+      const resumeRequired = !isReturningCandidate && !hasResumeFlag;
+      // Do not add resume to generic fields because it's a file input; we'll validate separately below.
+
+      // Validate generic fields
       fields.forEach((field) => {
         const el = document.getElementById(field.id);
         if (!el) return;
         const msg = el.nextElementSibling;
         let isValid = true;
+        const val = (typeof el.value === 'string') ? el.value.trim() : el.value;
 
-        if (!el.value.trim()) isValid = false;
-        if (field.pattern && !field.pattern.test(el.value.trim())) isValid = false;
-        if (field.min && el.value.trim().length < field.min) isValid = false;
+        if (field.required && (!val || val.length === 0)) isValid = false;
+        if (field.pattern && val && !field.pattern.test(val)) isValid = false;
+        if (field.min && val && val.length < field.min) isValid = false;
 
         if (!isValid) {
           el.classList.add('is-invalid');
@@ -177,6 +232,41 @@ document.addEventListener('DOMContentLoaded', function () {
         }
       });
 
+      // Resume/file validation (separate)
+      const resumeEl = document.getElementById('resume');
+      if (resumeRequired) {
+        // new user AND no existing resume => require upload
+        if (!resumeEl || !resumeEl.files || resumeEl.files.length === 0) {
+          if (resumeEl) showError(resumeEl, 'Please upload your resume (PDF or DOC, max 2 MB).');
+          valid = false;
+        }
+      } else {
+        // optional on edit: if provided, validate type and size (optional)
+        if (resumeEl && resumeEl.files && resumeEl.files.length > 0) {
+          const f = resumeEl.files[0];
+          // size check (2MB)
+          if (f && f.size > 2 * 1024 * 1024) {
+            showError(resumeEl, 'Resume must be less than 2 MB.');
+            valid = false;
+          }
+          // type check (basic)
+          const allowed = [
+            'application/pdf',
+            'application/msword',
+            'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+          ];
+          if (f && !allowed.includes(f.type)) {
+            showError(resumeEl, 'Resume must be PDF or DOC/DOCX.');
+            valid = false;
+          }
+        } else {
+          // ensure no stale invalid class
+          if (resumeEl) {
+            hideError(resumeEl);
+          }
+        }
+      }
+
       if (!valid) {
         e.preventDefault();
         window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -184,5 +274,3 @@ document.addEventListener('DOMContentLoaded', function () {
     });
   }
 });
-
-

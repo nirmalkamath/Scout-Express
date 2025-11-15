@@ -60,8 +60,18 @@ export async function handleJobPreferences(req: Request, res: Response): Promise
       validationResult.data.availability
     ]);
 
+    req.session.candidateId = undefined;
+
+req.session.destroy(err => {
+  if (err) {
+    console.error("Session destroy error:", err);
+    return res.status(500).send("Something went wrong. Please try again.");
+  }
+
+
     // Redirect to registration complete
     res.redirect('/registration-complete');
+  });
 
   } catch (error) {
     console.error('Job preferences processing failed:', error);

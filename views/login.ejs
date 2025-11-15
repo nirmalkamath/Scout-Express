@@ -16,9 +16,6 @@
     <div class="auth-wrapper">
       <div class="auth-container">
         <div class="auth-title" id="loginTitle">Candidate Login</div>
-        <% if (typeof error !== 'undefined' && error) { %>
-          <div class="error"><%= error %></div>
-        <% } %>
         <form method="POST" class="login-form" action="/login" novalidate>
           <input type="hidden" id="loginType" name="loginType" value="candidate">
           <div class="auth-field">
@@ -63,29 +60,7 @@
     &copy; 2025 Scout Express. All rights reserved.
   </footer>
 
-  <script>
-    document.addEventListener('DOMContentLoaded', function() {
-      const loginTypeItems = document.querySelectorAll('.login-type-item');
-      const loginTitle = document.getElementById('loginTitle');
-      const loginTypeInput = document.getElementById('loginType');
-
-      loginTypeItems.forEach(item => {
-        item.addEventListener('click', function() {
-          // Remove active class from all items
-          loginTypeItems.forEach(i => i.classList.remove('active'));
-          
-          // Add active class to clicked item
-          this.classList.add('active');
-          
-          // Update title and hidden input
-          const title = this.getAttribute('data-title');
-          const type = this.getAttribute('data-type');
-          loginTitle.textContent = title;
-          loginTypeInput.value = type;
-        });
-      });
-    });
-  </script>
+  <script src="/js/login.js"></script>
 </body>
 </html>
 

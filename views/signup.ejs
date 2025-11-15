@@ -6,10 +6,7 @@
   <title>Candidate Registration • Scout Express</title>
   <link rel="stylesheet" href="/css/style.css">
   <link rel="stylesheet" href="/css/auth.css">
-  <style>
-    .error-message { color: #d93025; font-size: 0.85rem; margin-top: 4px; display: none; }
-    input.is-invalid, select.is-invalid, textarea.is-invalid { border-color: #d93025; }
-  </style>
+  <link rel="stylesheet" href="/css/signup.css">
 </head>
 <body>  
 
@@ -138,9 +135,13 @@
             <div class="auth-section-title">Resume</div>
             <div class="auth-grid">
               <div class="auth-field full-width">
-                <label for="resume">Upload Resume <% if (existingData) { %><span class="optional">(optional)</span><% } else { %><span class="required">*</span><% } %></label>
-                <input id="resume" name="resume" type="file" accept="application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document" <% if (!existingData.email) { %> required <% } %>>
-                <span class="error-message">Please upload your resume (PDF or DOC, max 2 MB).</span>
+                <label for="resume">Upload Resume <% if (candidateId) { %>
+      <span class="optional">(optional)</span>
+    <% } else { %>
+      <span class="required">*</span>
+    <% } %></label>
+                <input id="resume" name="resume" type="file" accept="application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document" <% if (!candidateId) { %> required <% } %>>
+               <span class="error-message">Please upload your resume (PDF or DOC, max 2 MB).</span> 
               </div>
                <p class="field-hint">Attach your latest resume in PDF or DOC format, up to 2&nbsp;MB.</p>
             </div>
@@ -161,7 +162,59 @@
   <footer>
     &copy; 2025 Scout Express. All rights reserved.
   </footer>
+<script>
+  // produce a safe JS literal: either a string ID or null
+  window.candidateId = <%= JSON.stringify(typeof candidateId !== 'undefined' ? candidateId : null) %>;
+  // existingData.resume might be a filename or undefined — coerce to true/false
+  window.hasResume = <%= JSON.stringify(Boolean(existingData && existingData.resume)) %>;
+</script>
+<script>
+  // Debug: show relevant flags and resume element state
+console.log('window.candidateId =>', window.candidateId);
+console.log('window.hasResume =>', window.hasResume);
 
+// show resume input outerHTML (exact HTML as in DOM now)
+const resumeEl = document.getElementById('resume');
+console.log('resumeEl exists?', !!resumeEl);
+if (resumeEl) {
+  console.log('resume outerHTML:', resumeEl.outerHTML);
+  console.log('has is-invalid class?', resumeEl.classList.contains('is-invalid'));
+  console.log('required attribute (DOM):', resumeEl.required);
+  console.log('next sibling (error msg) style/display:', resumeEl.nextElementSibling ? resumeEl.nextElementSibling.style.display : 'no-msg');
+}
+
+// show whether the HTML source contained class (view-source check)
+// This next check compares outerHTML now vs initial HTML in page source (only possible if not modified)
+console.log('document.documentElement.innerHTML contains "class=\\"is-invalid\\""?', document.documentElement.innerHTML.indexOf('class="is-invalid"') !== -1);
+
+// try to find any script that sets class on page load by searching inline scripts
+const inlineScripts = Array.from(document.scripts).filter(s => !s.src).map(s => s.textContent).join('\n-----\n');
+console.log('inline scripts length:', inlineScripts.length);
+
+  (function(){
+    try {
+      // If server tells us this is a returning candidate or resume exists, remove error class immediately
+      var isReturning = !!(window.candidateId || window.hasResume === true || window.hasResume === 'true');
+      var resumeEl = document.getElementById('resume');
+      if (!resumeEl) return;
+      if (isReturning) {
+        // remove invalid class and hide message instantly
+        resumeEl.classList.remove('is-invalid');
+        resumeEl.required = false;
+        var msg = resumeEl.nextElementSibling;
+        if (msg) {
+          msg.style.display = 'none';
+        }
+      } else {
+        // For fresh users ensure required attribute is present
+        resumeEl.required = true;
+      }
+    } catch (e) {
+      // silent fail — we don't want JS errors to block page
+      console.warn('resume inline cleanup failed', e);
+    }
+  })();
+</script>
 
   <script src="/js/signup.js"></script>
 </body>

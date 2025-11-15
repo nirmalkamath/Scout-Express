@@ -44,7 +44,7 @@ export async function renderWorkExperience(req: Request, res: Response): Promise
   if (candidateId) {
     try {
       const [rows] = await mysqlPool.execute(
-        'SELECT job_title, company_name, job_start_date, job_end_date, job_description, currently_work FROM candidate_experience WHERE candidate_id = ? ORDER BY job_start_date DESC',
+        'SELECT job_title, company_name, job_start_date, job_end_date, job_description, currently_work FROM candidate_experience WHERE candidate_id = ? ORDER BY id ASC',
         [candidateId]
       );
       existingExperience = (rows as any[]).map(exp => ({

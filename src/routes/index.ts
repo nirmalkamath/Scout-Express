@@ -63,14 +63,16 @@ router.post(
   handleSignup
 );
 
-router.get('/work-experience', renderWorkExperience);
-router.post('/work-experience', handleWorkExperience);
-router.get('/education', renderEducation);
-router.post('/education', handleEducation);
-router.get('/skills', renderSkills);
-router.post('/skills', handleSkills);
-router.get('/job-preferences', renderJobPreferences);
-router.post('/job-preferences', handleJobPreferences);
+import { requireCandidateSession } from "../middlewares/requireCandidateSession";
+
+router.get('/work-experience', requireCandidateSession, renderWorkExperience);
+router.post('/work-experience', requireCandidateSession, handleWorkExperience);
+router.get('/education', requireCandidateSession, renderEducation);
+router.post('/education', requireCandidateSession, handleEducation);
+router.get('/skills', requireCandidateSession, renderSkills);
+router.post('/skills', requireCandidateSession, handleSkills);
+router.get('/job-preferences', requireCandidateSession, renderJobPreferences);
+router.post('/job-preferences', requireCandidateSession, handleJobPreferences);
 router.get('/registration-complete', (req, res) => res.render('registration-complete'));
 
 export default router;
