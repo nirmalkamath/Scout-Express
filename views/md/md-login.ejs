@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MD (Analytics) Login • Scout Express</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="stylesheet" href="/css/auth.css">
+</head>
+<body>
+  <header>
+    <a href="/">Home</a>
+  </header>
+   <main>
+    <div class="auth-wrapper">
+      <div class="auth-container">
+        <div class="auth-title" id="loginTitle">MD Login</div>
+        <% if (typeof error !== 'undefined' && error) { %>
+          <div class="error"><%= error %></div>
+        <% } %>
+        <form class="login-form" method="POST" action="/md-login" id="loginForm" novalidate>
+          <input type="hidden" id="loginType" name="loginType" value="admin">
+          <div class="auth-field">
+            <label for="username">Username</label>
+            <input id="username" name="username" type="text" placeholder="Enter username" required>
+          </div>
+          <div class="auth-field">
+            <label for="password">Password</label>
+            <input id="password" name="password" type="password" placeholder="••••••••" required minlength="6">
+          </div>
+          <div class="auth-actions">
+            <button class="btn-primary" type="submit">Sign in</button>
+            <a href="/forgot-password" class="forgot-link">Forgot password?</a>
+          </div>
+        </form>
+      </div>
+
+      <div class="login-type-selector">
+        <div class="selector-title">Login As</div>
+        <div class="login-type-list">
+          <div class="login-type-item active" data-type="md" data-title="MD (Analytics) Login">
+            <span class="type-label">MD (Analytics) Login</span>
+          </div>
+          <div class="login-type-item" data-type="admin" data-title="Admin Login">
+            <span class="type-label">Admin Login</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer>
+    &copy; 2025 Scout Express. All rights reserved.
+  </footer>
+
+  <script src="/js/admin-login.js"></script>
+</body>
+</html>

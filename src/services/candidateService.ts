@@ -100,6 +100,36 @@ export async function registerCandidate(payload: unknown, files: SignupFiles): P
   return (insertResult as any).insertId;
 }
 
+export async function getCandidateBasicInfo(candidateId: number): Promise<any | null> {
+  try {
+    const [rows] = await mysqlPool.execute(
+      `SELECT 
+        full_name, 
+        professional_headline, 
+        professional_summary, 
+        phone_number, 
+        country, 
+        state, 
+        district, 
+        city, 
+        pin_code, 
+        email,
+        resume
+      FROM candidates 
+      WHERE id = ?`,
+      [candidateId]
+    );
+    
+    if ((rows as any[]).length > 0) {
+      return (rows as any[])[0];
+    }
+    return null;
+  } catch (error) {
+    console.error('Error fetching candidate basic info:', error);
+    return null;
+  }
+}
+
 export async function updateCandidate(candidateId: number, payload: unknown, files: SignupFiles): Promise<void> {
   const dbOk = await pingDatabase();
   if (!dbOk) {

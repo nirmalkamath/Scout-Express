@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import { z } from 'zod';
-import { mysqlPool } from '../db/mysql';
+import { getCandidateSkills, saveCandidateSkills } from '../services/skillsService';
 
 const skillsSchema = z.object({
   skills: z.array(z.object({
@@ -9,23 +9,13 @@ const skillsSchema = z.object({
 });
 
 export async function renderSkills(req: Request, res: Response): Promise<void> {
-  let existingSkills: any[] = [];
   const candidateId = req.session.candidateId;
-  if (candidateId) {
-    try {
-      const [rows] = await mysqlPool.execute(
-        'SELECT skill_name FROM candidate_skills WHERE candidate_id = ? ORDER BY created_at ASC',
-        [candidateId]
-      );
-      existingSkills = (rows as any[]).map(skill => ({
-        skill_name: skill.skill_name
-      }));
-    } catch (error) {
-      console.error('Error fetching skills:', error);
-    }
-  }
+  const existingSkills = candidateId ? await getCandidateSkills(candidateId) : [];
 
-  res.render('skills', { existingSkills });
+  res.render('skills', {
+    existingSkills,
+    error: null
+  });
 }
 
 export async function handleSkills(req: Request, res: Response): Promise<void> {
@@ -34,7 +24,7 @@ export async function handleSkills(req: Request, res: Response): Promise<void> {
     const validationResult = skillsSchema.safeParse(req.body);
 
     if (!validationResult.success) {
-      const errorMsg = validationResult.error.issues.map((issue) => issue.message).join('<br>');
+      const errorMsg = validationResult.error.issues.map((issue: any) => issue.message).join('<br>');
       res.status(400).render('skills', { error: errorMsg });
       return;
     }
@@ -45,29 +35,14 @@ export async function handleSkills(req: Request, res: Response): Promise<void> {
       return;
     }
 
-    // Delete existing skills and insert new ones
-    await mysqlPool.execute('DELETE FROM candidate_skills WHERE candidate_id = ?', [candidateId]);
-
-    const insertSql = `
-      INSERT INTO candidate_skills
-      (candidate_id, skill_name)
-      VALUES (?, ?)
-    `;
-
-    for (const skill of validationResult.data.skills) {
-      await mysqlPool.execute(insertSql, [
-        candidateId,
-        skill.skill_name
-      ]);
-    }
+    // Save skills using service
+    await saveCandidateSkills(candidateId, validationResult.data.skills);
 
     // Redirect to next step: job preferences
     res.redirect('/job-preferences');
 
   } catch (error) {
     console.error('Skills processing failed:', error);
-    res.status(500).render('skills', {
-      error: 'Something went wrong while processing your skills. Please try again later.'
-    });
+    res.status(500).render('skills', { error: 'Failed to save skills. Please try again.' });
   }
 }

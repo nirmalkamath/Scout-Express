@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= typeof pageTitle !== 'undefined' ? pageTitle : 'MD Dashboard' %> • Scout Express</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="stylesheet" href="/css/dashboard.css">
+</head>
+<body>
+  <header>
+    <a href="/">Home</a>
+  </header>
+
+  <main>
+    <div class="admin-wrapper">
+      <%- include('md-sidebar', { activePage: typeof activePage !== 'undefined' ? activePage : 'dashboard' }) %>

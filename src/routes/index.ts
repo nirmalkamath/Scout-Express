@@ -2,8 +2,11 @@
 import { Router } from 'express';
 import { getDatabaseHealth } from '../controllers/healthController';
 import { handleLogin, handleAdminLogin, handleSignup, renderLogin, renderSignup } from '../controllers/authController';
+import { handleMDLogin } from '../controllers/mdAuthController';
 import { handleChangeUsername, handleChangePassword } from '../controllers/adminController';
 import { getAdminDetails } from '../services/adminService';
+import { noCache, adminAuth } from '../middlewares/noCache';
+import { mdAuth } from '../middlewares/mdAuth';
 import { renderHome } from '../controllers/homeController';
 import { handleWorkExperience, renderWorkExperience } from '../controllers/workExperienceController';
 import { handleEducation, renderEducation } from '../controllers/educationController';
@@ -17,31 +20,29 @@ router.get('/', renderHome);
 router.get('/health/db', getDatabaseHealth);
 router.get('/login', renderLogin);
 router.post('/login', handleLogin);
-router.get('/admin-login', (req, res) => res.render('admin-login'));
+router.get('/admin-login', noCache, (req, res) => res.render('admin/admin-login'));
 router.post('/admin-login', handleAdminLogin);
-router.get('/admin-dashboard', (req, res) => {
-  if (req.session.userType !== 'admin') {
-    return res.redirect('/admin-login');
-  }
-  res.render('admin-dashboard', {
+router.get('/md-login', noCache, (req, res) => res.render('md/md-login'));
+router.post('/md-login', handleMDLogin);
+router.get('/admin-dashboard', adminAuth, (req, res) => {
+  res.render('admin/admin-dashboard', {
     success: req.query.success,
     error: req.query.error
   });
 });
-router.get('/admin/settings', (req, res) => {
-  if (req.session.userType !== 'admin') {
-    return res.redirect('/admin-login');
-  }
-  res.render('admin-settings', {
+router.get('/admin/settings', adminAuth, async (req, res) => {
+  const adminDetails = await getAdminDetails(req.session.userId!);
+  res.render('admin/admin-settings', {
+    success: req.query.success,
+    error: req.query.error,
+    currentUsername: adminDetails?.username || ''
+  });
+});
+router.get('/md-dashboard', mdAuth, (req, res) => {
+  res.render('md/md-dashboard', {
     success: req.query.success,
     error: req.query.error
   });
-});
-router.get('/md-dashboard', (req, res) => {
-  if (req.session.userType !== 'md') {
-    return res.redirect('/admin-login');
-  }
-  res.render('md-dashboard');
 });
 router.post('/logout', (req, res) => {
   req.session.destroy((err) => {
@@ -49,6 +50,14 @@ router.post('/logout', (req, res) => {
       console.error('Logout error:', err);
     }
     res.redirect('/');
+  });
+});
+router.post('/admin_logout', (req, res) => {
+  req.session.destroy((err) => {
+    if (err) {
+      console.error('Logout error:', err);
+    }
+    res.redirect('/admin-login');
   });
 });
 router.post('/admin/change-username', handleChangeUsername);
@@ -73,6 +82,7 @@ router.get('/skills', requireCandidateSession, renderSkills);
 router.post('/skills', requireCandidateSession, handleSkills);
 router.get('/job-preferences', requireCandidateSession, renderJobPreferences);
 router.post('/job-preferences', requireCandidateSession, handleJobPreferences);
+router.get('/success', (req, res) => res.render('registration-complete'));
 router.get('/registration-complete', (req, res) => res.render('registration-complete'));
 
 export default router;

@@ -1,0 +1,33 @@
+<!-- Sidebar -->
+      <aside class="admin-sidebar">
+        <div class="sidebar-header">
+          <h3>MD (Analytics)</h3>
+        </div>
+        <nav class="sidebar-nav">
+          <ul class="nav-list">
+            <li class="nav-item">
+              <a href="/md-dashboard" class="nav-link <%= activePage === 'dashboard' ? 'active' : '' %>">
+                📊 Dashboard
+              </a>
+            </li>
+            <li class="nav-item">
+              <a href="/md-analytics" class="nav-link <%= activePage === 'analytics' ? 'active' : '' %>">
+                📈 Analytics
+              </a>
+            </li>
+            <li class="nav-item">
+              <a href="/md-reports" class="nav-link <%= activePage === 'reports' ? 'active' : '' %>">
+                📋 Reports
+              </a>
+            </li>
+            <li class="nav-item">
+              <a href="/md-settings" class="nav-link <%= activePage === 'settings' ? 'active' : '' %>">
+                ⚙️ Settings
+              </a>
+            </li>
+          </ul>
+        </nav>
+      </aside>
+
+      <!-- Main Content Area -->
+      <div class="admin-main-content">

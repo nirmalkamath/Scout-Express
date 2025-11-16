@@ -19,7 +19,7 @@
         <% if (typeof error !== 'undefined' && error) { %>
           <div class="error"><%= error %></div>
         <% } %>
-        <form class="login-form" method="POST" action="/admin-login" novalidate>
+        <form class="login-form" method="POST" action="/admin-login" id="loginForm" novalidate>
           <input type="hidden" id="loginType" name="loginType" value="admin">
           <div class="auth-field">
             <label for="username">Username</label>
@@ -39,12 +39,11 @@
       <div class="login-type-selector">
         <div class="selector-title">Login As</div>
         <div class="login-type-list">
-          <div class="login-type-item active" data-type="admin" data-title="Admin Login">
+          <div class="login-type-item active">
             <span class="type-label">Admin Login</span>
           </div>
-          <div class="login-type-item" data-type="md" data-title="MD (Analytics) Login">
+          <div class="login-type-item" onclick="location.href='/md-login'">
             <span class="type-label">MD (Analytics) Login</span>
-          </div>
         </div>
       </div>
     </div>

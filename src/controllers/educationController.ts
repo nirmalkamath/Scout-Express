@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import { z } from 'zod';
-import { mysqlPool } from '../db/mysql';
+import { getCandidateEducation, saveCandidateEducation } from '../services/educationService';
 
 const educationSchema = z.object({
   education: z.array(z.object({
@@ -12,24 +12,8 @@ const educationSchema = z.object({
 });
 
 export async function renderEducation(req: Request, res: Response): Promise<void> {
-  let existingEducation: any[] = [];
   const candidateId = req.session.candidateId;
-  if (candidateId) {
-    try {
-      const [rows] = await mysqlPool.execute(
-        'SELECT degree, institution, graduation_year, grade FROM candidate_education WHERE candidate_id = ? ORDER BY graduation_year ASC',
-        [candidateId]
-      );
-      existingEducation = (rows as any[]).map(edu => ({
-        degree: edu.degree,
-        institution: edu.institution,
-        graduation_year: edu.graduation_year,
-        grade: edu.grade
-      }));
-    } catch (error) {
-      console.error('Error fetching education:', error);
-    }
-  }
+  const existingEducation = candidateId ? await getCandidateEducation(candidateId) : [];
 
   res.render('education', { existingEducation });
 }
@@ -40,7 +24,7 @@ export async function handleEducation(req: Request, res: Response): Promise<void
     const validationResult = educationSchema.safeParse(req.body);
 
     if (!validationResult.success) {
-      const errorMsg = validationResult.error.issues.map((issue) => issue.message).join('<br>');
+      const errorMsg = validationResult.error.issues.map((issue: any) => issue.message).join('<br>');
       res.status(400).render('education', { error: errorMsg });
       return;
     }
@@ -51,32 +35,14 @@ export async function handleEducation(req: Request, res: Response): Promise<void
       return;
     }
 
-    // Delete existing education and insert new ones
-    await mysqlPool.execute('DELETE FROM candidate_education WHERE candidate_id = ?', [candidateId]);
-
-    const insertSql = `
-      INSERT INTO candidate_education
-      (candidate_id, degree, institution, graduation_year, grade)
-      VALUES (?, ?, ?, ?, ?)
-    `;
-
-    for (const edu of validationResult.data.education) {
-      await mysqlPool.execute(insertSql, [
-        candidateId,
-        edu.degree,
-        edu.institution,
-        edu.graduation_year,
-        edu.grade
-      ]);
-    }
+    // Save education using service
+    await saveCandidateEducation(candidateId, validationResult.data.education);
 
     // Redirect to next step: skills
     res.redirect('/skills');
 
   } catch (error) {
     console.error('Education processing failed:', error);
-    res.status(500).render('education', {
-      error: 'Something went wrong while processing your education details. Please try again later.'
-    });
+    res.status(500).render('education', { error: 'Failed to save education. Please try again.' });
   }
 }

@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import { z } from 'zod';
-import { mysqlPool } from '../db/mysql';
+import { getCandidateWorkExperience, saveCandidateWorkExperience } from '../services/workExperienceService';
 
 declare module 'express-session' {
   interface SessionData {
@@ -39,28 +39,14 @@ interface WorkExperience {
 export async function renderWorkExperience(req: Request, res: Response): Promise<void> {
   const success = req.query.success === '1' ? 'You basic information has been saved successfully! Please provide your work experience details.' : null;
 
-  let existingExperience: any[] = [];
   const candidateId = req.session.candidateId;
-  if (candidateId) {
-    try {
-      const [rows] = await mysqlPool.execute(
-        'SELECT job_title, company_name, job_start_date, job_end_date, job_description, currently_work FROM candidate_experience WHERE candidate_id = ? ORDER BY id ASC',
-        [candidateId]
-      );
-      existingExperience = (rows as any[]).map(exp => ({
-        position: exp.job_title,
-        company: exp.company_name,
-        start_date: exp.job_start_date ? new Date(exp.job_start_date).toISOString().split('T')[0] : '',
-        end_date: exp.job_end_date ? new Date(exp.job_end_date).toISOString().split('T')[0] : '',
-        description: exp.job_description,
-        currently_working: exp.currently_work ? 'on' : 'off'
-      }));
-    } catch (error) {
-      console.error('Error fetching work experience:', error);
-    }
-  }
+  const existingExperience = candidateId ? await getCandidateWorkExperience(candidateId) : [];
 
-  res.render('work-experience', { success, existingExperience });
+  res.render('work-experience', {
+    existingExperience,
+    success,
+    error: null
+  });
 }
 
 export async function handleWorkExperience(req: Request, res: Response): Promise<void> {
@@ -69,7 +55,7 @@ export async function handleWorkExperience(req: Request, res: Response): Promise
     const validationResult = workExperienceSchema.safeParse(req.body);
 
     if (!validationResult.success) {
-      const errorMsg = validationResult.error.issues.map((issue) => issue.message).join('<br>');
+      const errorMsg = validationResult.error.issues.map((issue: any) => issue.message).join('<br>');
       res.status(400).render('work-experience', { error: errorMsg });
       return;
     }
@@ -80,36 +66,14 @@ export async function handleWorkExperience(req: Request, res: Response): Promise
       return;
     }
 
-    // Delete existing work experiences and insert new ones
-    await mysqlPool.execute('DELETE FROM candidate_experience WHERE candidate_id = ?', [candidateId]);
-
-    const insertSql = `
-      INSERT INTO candidate_experience
-      (candidate_id, job_title, company_name, job_start_date, job_end_date, job_description, currently_work)
-      VALUES (?, ?, ?, ?, ?, ?, ?)
-    `;
-
-    for (const exp of validationResult.data.work_experience) {
-      const endDate = exp.currently_working === 'on' ? null : (exp.end_date || null);
-      const currentlyWork = exp.currently_working === 'on' ? 1 : 0;
-      await mysqlPool.execute(insertSql, [
-        candidateId,
-        exp.position,
-        exp.company,
-        exp.start_date,
-        endDate,
-        exp.description,
-        currentlyWork
-      ]);
-    }
+    // Save work experience using service
+    await saveCandidateWorkExperience(candidateId, validationResult.data.work_experience);
 
     // Redirect to next step: education
-    res.redirect('/education');
+    res.redirect('/education?success=1');
 
   } catch (error) {
     console.error('Work experience processing failed:', error);
-    res.status(500).render('work-experience', {
-      error: 'Something went wrong while processing your work experience. Please try again later.'
-    });
+    res.status(500).render('work-experience', { error: 'Failed to save work experience. Please try again.' });
   }
 }

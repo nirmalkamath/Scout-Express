@@ -1,0 +1,30 @@
+<%- include('admin-header', { pageTitle: 'Admin Dashboard' }) %>
+
+      <%- include('admin-sidebar', { activePage: 'dashboard' }) %>
+
+      <!-- Main Content Area -->
+      <div class="admin-main-content">
+        <div class="content-header">
+          <div class="page-title">Dashboard Overview</div>
+          <form method="POST" action="/admin_logout" style="display: inline;">
+            <button type="submit" class="logout-btn">Logout</button>
+          </form>
+        </div>
+
+        <% if (typeof success !== 'undefined' && success) { %>
+          <div class="alert alert-success"><%= success %></div>
+        <% } %>
+
+        <% if (typeof error !== 'undefined' && error) { %>
+          <div class="alert alert-error"><%= error %></div>
+        <% } %>
+
+        <div class="dashboard-content">
+          <div class="welcome-section">
+            <h2>Welcome to Admin Dashboard</h2>
+            <p>Select an option from the sidebar to manage your platform.</p>
+          </div>
+        </div>
+      </div>
+
+<%- include('admin-footer') %>
