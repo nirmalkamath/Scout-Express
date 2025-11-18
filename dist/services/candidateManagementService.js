@@ -100,7 +100,7 @@ class CandidateManagementService {
         SELECT * FROM candidate_preferences WHERE candidate_id = ?
       `;
             const [preferencesResult] = await mysql_1.mysqlPool.execute(preferencesQuery, [id]);
-            candidate.preferences = preferencesResult;
+            candidate.job_preferences = preferencesResult[0] || null;
             return candidate;
         }
         catch (error) {
@@ -180,13 +180,15 @@ class CandidateManagementService {
                 (candidate_id, company_name, job_title, job_start_date, job_end_date, currently_work, job_description)
                 VALUES (?, ?, ?, ?, ?, ?, ?)
               `;
+                            const currently = Boolean(we.currently_work);
+                            const endDate = currently ? null : (we.job_end_date || null);
                             await connection.execute(weQuery, [
                                 id,
                                 we.company_name,
                                 we.job_title,
-                                we.job_start_date,
-                                we.job_end_date || null,
-                                we.currently_work || false,
+                                we.job_start_date || null,
+                                endDate,
+                                currently ? 1 : 0,
                                 we.job_description || ''
                             ]);
                         }
@@ -243,7 +245,7 @@ class CandidateManagementService {
                         const jpUpdateQuery = `
               UPDATE candidate_preferences 
               SET 
-                expected_salary = ?, availability = ?, updated_at = NOW()
+                expected_salary = ?, availability = ?
               WHERE candidate_id = ?
             `;
                         await connection.execute(jpUpdateQuery, [

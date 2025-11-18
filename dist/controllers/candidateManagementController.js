@@ -121,7 +121,16 @@ async function updateCandidate(req, res) {
             res.redirect(`/admin/candidates/${req.params.id}/edit`);
             return;
         }
-        const updateData = req.body;
+        const updateData = req.body || {};
+        if (updateData.experience && !Array.isArray(updateData.experience)) {
+            updateData.experience = Object.values(updateData.experience);
+        }
+        if (updateData.education && !Array.isArray(updateData.education)) {
+            updateData.education = Object.values(updateData.education);
+        }
+        if (updateData.skills && !Array.isArray(updateData.skills)) {
+            updateData.skills = Object.values(updateData.skills);
+        }
         const result = await candidateManagementService_1.candidateManagementService.updateCandidate(candidateId, updateData);
         if (result.success) {
             if (req.xhr || req.headers.accept?.includes('application/json')) {

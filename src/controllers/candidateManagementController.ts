@@ -121,7 +121,16 @@ export async function updateCandidate(req: Request, res: Response): Promise<void
       return;
     }
 
-    const updateData = req.body;
+    const updateData: any = req.body || {};
+    if (updateData.experience && !Array.isArray(updateData.experience)) {
+      updateData.experience = Object.values(updateData.experience);
+    }
+    if (updateData.education && !Array.isArray(updateData.education)) {
+      updateData.education = Object.values(updateData.education);
+    }
+    if (updateData.skills && !Array.isArray(updateData.skills)) {
+      updateData.skills = Object.values(updateData.skills);
+    }
     const result = await candidateManagementService.updateCandidate(candidateId, updateData);
 
     if (result.success) {

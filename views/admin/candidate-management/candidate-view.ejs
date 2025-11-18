@@ -33,7 +33,8 @@
               <div class="contact-info">
                 <p><strong>Email:</strong> <%= candidate.email %></p>
                 <p><strong>Phone:</strong> <%= candidate.phone_number %></p>
-                <p><strong>Location:</strong> <%= candidate.city %>, <%= candidate.country %></p>
+                <p><strong>Location:</strong> <%= candidate.city %>, <%= candidate.state %>, <%= candidate.country %></p>
+                <p><strong>Pin Code:</strong> <%= candidate.pin_code %></p>
               </div>
             </div>
             <div class="profile-status">
@@ -60,11 +61,11 @@
                   <div class="experience-item">
                     <h4><%= work.position %> at <%= work.company %></h4>
                     <p class="duration">
-                      <%= new Date(work.start_date).toLocaleDateString() %> - 
-                      <% if (work.currently_working === 'on') { %>
+                      <%= work.start_date ? new Date(work.start_date).toLocaleDateString() : '' %> - 
+                      <% if (work.currently_working) { %>
                         Present
                       <% } else { %>
-                        <%= new Date(work.end_date).toLocaleDateString() %>
+                        <%= work.end_date ? new Date(work.end_date).toLocaleDateString() : '' %>
                       <% } %>
                     </p>
                     <% if (work.description) { %>
@@ -85,12 +86,11 @@
                   <div class="education-item">
                     <h4><%= edu.degree %></h4>
                     <p><%= edu.institution %></p>
-                    <% if (edu.specialization) { %>
-                      <p><strong>Specialization:</strong> <%= edu.specialization %></p>
+                    <% if (edu.graduation_year) { %>
+                      <p><strong>Graduation Year:</strong> <%= edu.graduation_year %></p>
                     <% } %>
-                    <p><%= edu.start_year %> - <%= edu.end_year || 'Present' %></p>
-                    <% if (edu.cgpa_percentage) { %>
-                      <p><strong>CGPA/Percentage:</strong> <%= edu.cgpa_percentage %></p>
+                    <% if (edu.grade) { %>
+                      <p><strong>Grade:</strong> <%= edu.grade %></p>
                     <% } %>
                   </div>
                 <% }); %>
@@ -106,12 +106,6 @@
                 <% candidate.skills.forEach(skill => { %>
                   <div class="skill-item">
                     <h4><%= skill.skill_name %></h4>
-                    <% if (skill.proficiency_level) { %>
-                      <p><strong>Proficiency:</strong> <%= skill.proficiency_level %></p>
-                    <% } %>
-                    <% if (skill.years_of_experience) { %>
-                      <p><strong>Experience:</strong> <%= skill.years_of_experience %> years</p>
-                    <% } %>
                   </div>
                 <% }); %>
               </div>

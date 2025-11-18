@@ -31,7 +31,7 @@
             <!-- Basic Information -->
             <div class="form-section">
               <h3>Basic Information</h3>
-              <div class="form-grid">
+                  <div class="form-grid">
                 <div class="form-group">
                   <label for="full_name">Full Name *</label>
                   <input type="text" id="full_name" name="full_name" value="<%= candidate.full_name %>" required>
@@ -92,31 +92,32 @@
                       <div class="form-grid">
                         <div class="form-group">
                           <label>Company *</label>
-                          <input type="text" name="work_experience[<%= index %>][company]" value="<%= work.company %>" required>
+                          <input type="text" name="experience[<%= index %>][company_name]" value="<%= work.company %>" required>
                         </div>
                         <div class="form-group">
                           <label>Position *</label>
-                          <input type="text" name="work_experience[<%= index %>][position]" value="<%= work.position %>" required>
+                          <input type="text" name="experience[<%= index %>][job_title]" value="<%= work.position %>" required>
                         </div>
                         <div class="form-group">
                           <label>Start Date</label>
-                          <input type="date" name="work_experience[<%= index %>][start_date]" value="<%= work.start_date || '' %>">
+                          <input type="date" name="experience[<%= index %>][job_start_date]" value="<%= work.start_date || '' %>">
                         </div>
                         <div class="form-group">
                           <label>End Date</label>
-                          <input type="date" name="work_experience[<%= index %>][end_date]" value="<%= work.end_date || '' %>">
+                          <input type="date" name="experience[<%= index %>][job_end_date]" value="<%= work.end_date || '' %>">
                         </div>
                         <div class="form-group">
                           <label>
-                            <input type="checkbox" name="work_experience[<%= index %>][currently_working]" <%= work.currently_working === 'on' ? 'checked' : '' %>>
+                            <input type="checkbox" name="experience[<%= index %>][currently_work]" <%= work.currently_working === 'on' ? 'checked' : '' %>>
                             Currently Working
                           </label>
                         </div>
                         <div class="form-group full-width">
                           <label>Description</label>
-                          <textarea name="work_experience[<%= index %>][description]" rows="3"><%= work.description || '' %></textarea>
+                          <textarea name="experience[<%= index %>][job_description]" rows="3"><%= work.description || '' %></textarea>
                         </div>
                       </div>
+                      <button type="button" onclick="removeItem(this)" class="btn btn-danger btn-sm">Remove</button>
                     </div>
                   <% }); %>
                 <% } %>
@@ -138,25 +139,18 @@
                         </div>
                         <div class="form-group">
                           <label>Institution *</label>
-                          <input type="text" name="education[<%= index %>][institution]" value="<%= edu.institution %>" required>
+                          <input type="text" name="education[<%= index %>][institution_name]" value="<%= edu.institution %>" required>
                         </div>
                         <div class="form-group">
-                          <label>Specialization</label>
-                          <input type="text" name="education[<%= index %>][specialization]" value="<%= edu.specialization || '' %>">
+                          <label>Graduation Year</label>
+                          <input type="number" name="education[<%= index %>][graduation_year]" value="<%= edu.graduation_year || '' %>" min="1900" max="2100">
                         </div>
                         <div class="form-group">
-                          <label>Start Year</label>
-                          <input type="number" name="education[<%= index %>][start_year]" value="<%= edu.start_year || '' %>">
-                        </div>
-                        <div class="form-group">
-                          <label>End Year</label>
-                          <input type="number" name="education[<%= index %>][end_year]" value="<%= edu.end_year || '' %>">
-                        </div>
-                        <div class="form-group">
-                          <label>CGPA/Percentage</label>
-                          <input type="text" name="education[<%= index %>][cgpa_percentage]" value="<%= edu.cgpa_percentage || '' %>">
+                          <label>Grade</label>
+                          <input type="text" name="education[<%= index %>][grade]" value="<%= edu.grade || '' %>">
                         </div>
                       </div>
+                      <button type="button" onclick="removeItem(this)" class="btn btn-danger btn-sm">Remove</button>
                     </div>
                   <% }); %>
                 <% } %>
@@ -176,21 +170,8 @@
                           <label>Skill Name *</label>
                           <input type="text" name="skills[<%= index %>][skill_name]" value="<%= skill.skill_name %>" required>
                         </div>
-                        <div class="form-group">
-                          <label>Proficiency Level</label>
-                          <select name="skills[<%= index %>][proficiency_level]">
-                            <option value="">Select</option>
-                            <option value="Beginner" <%= skill.proficiency_level === 'Beginner' ? 'selected' : '' %>>Beginner</option>
-                            <option value="Intermediate" <%= skill.proficiency_level === 'Intermediate' ? 'selected' : '' %>>Intermediate</option>
-                            <option value="Advanced" <%= skill.proficiency_level === 'Advanced' ? 'selected' : '' %>>Advanced</option>
-                            <option value="Expert" <%= skill.proficiency_level === 'Expert' ? 'selected' : '' %>>Expert</option>
-                          </select>
-                        </div>
-                        <div class="form-group">
-                          <label>Years of Experience</label>
-                          <input type="number" name="skills[<%= index %>][years_of_experience]" value="<%= skill.years_of_experience || '' %>" step="0.5">
-                        </div>
                       </div>
+                      <button type="button" onclick="removeItem(this)" class="btn btn-danger btn-sm">Remove</button>
                     </div>
                   <% }); %>
                 <% } %>
@@ -203,35 +184,19 @@
               <h3>Job Preferences</h3>
               <div class="form-grid">
                 <div class="form-group">
-                  <label for="job_type">Job Type</label>
-                  <select id="job_type" name="job_preferences[job_type]">
-                    <option value="">Select</option>
-                    <option value="Full-time" <%= candidate.job_preferences && candidate.job_preferences.job_type === 'Full-time' ? 'selected' : '' %>>Full-time</option>
-                    <option value="Part-time" <%= candidate.job_preferences && candidate.job_preferences.job_type === 'Part-time' ? 'selected' : '' %>>Part-time</option>
-                    <option value="Contract" <%= candidate.job_preferences && candidate.job_preferences.job_type === 'Contract' ? 'selected' : '' %>>Contract</option>
-                    <option value="Internship" <%= candidate.job_preferences && candidate.job_preferences.job_type === 'Internship' ? 'selected' : '' %>>Internship</option>
-                  </select>
-                </div>
-                <div class="form-group">
-                  <label for="preferred_location">Preferred Location</label>
-                  <input type="text" id="preferred_location" name="job_preferences[preferred_location]" value="<%= candidate.job_preferences && candidate.job_preferences.preferred_location || '' %>">
-                </div>
-                <div class="form-group">
                   <label for="expected_salary">Expected Salary</label>
-                  <input type="text" id="expected_salary" name="job_preferences[expected_salary]" value="<%= candidate.job_preferences && candidate.job_preferences.expected_salary || '' %>">
+                  <input type="text" id="expected_salary" name="preferences[expected_salary]" value="<%= candidate.job_preferences && candidate.job_preferences.expected_salary || '' %>">
                 </div>
                 <div class="form-group">
-                  <label for="notice_period">Notice Period</label>
-                  <input type="text" id="notice_period" name="job_preferences[notice_period]" value="<%= candidate.job_preferences && candidate.job_preferences.notice_period || '' %>">
-                </div>
-                <div class="form-group">
-                  <label for="work_mode">Work Mode</label>
-                  <select id="work_mode" name="job_preferences[work_mode]">
-                    <option value="">Select</option>
-                    <option value="Remote" <%= candidate.job_preferences && candidate.job_preferences.work_mode === 'Remote' ? 'selected' : '' %>>Remote</option>
-                    <option value="Office" <%= candidate.job_preferences && candidate.job_preferences.work_mode === 'Office' ? 'selected' : '' %>>Office</option>
-                    <option value="Hybrid" <%= candidate.job_preferences && candidate.job_preferences.work_mode === 'Hybrid' ? 'selected' : '' %>>Hybrid</option>
-                  </select>
+                  <label for="availability">Availability</label>
+                  <select id="availability" name="preferences[availability]">
+                  <option value="">Select availability</option>
+                  <option value="immediately" <%= (candidate.job_preferences && candidate.job_preferences.availability === 'immediately') ? 'selected' : '' %>>Immediately</option>
+                  <option value="within_1_month" <%= (candidate.job_preferences && candidate.job_preferences.availability === 'within_1_month') ? 'selected' : '' %>>Within 1 month</option>
+                  <option value="within_3_months" <%= (candidate.job_preferences && candidate.job_preferences.availability === 'within_3_months') ? 'selected' : '' %>>Within 3 months</option>
+                  <option value="within_6_months" <%= (candidate.job_preferences && candidate.job_preferences.availability === 'within_6_months') ? 'selected' : '' %>>Within 6 months</option>
+                  <option value="not_available" <%= (candidate.job_preferences && candidate.job_preferences.availability === 'not_available') ? 'selected' : '' %>>Not available</option>
+                </select>
                 </div>
               </div>
             </div>
@@ -264,29 +229,29 @@
         <div class="form-grid">
           <div class="form-group">
             <label>Company *</label>
-            <input type="text" name="work_experience[${workExperienceIndex}][company]" required>
+            <input type="text" name="experience[${workExperienceIndex}][company_name]" required>
           </div>
           <div class="form-group">
             <label>Position *</label>
-            <input type="text" name="work_experience[${workExperienceIndex}][position]" required>
+            <input type="text" name="experience[${workExperienceIndex}][job_title]" required>
           </div>
           <div class="form-group">
             <label>Start Date</label>
-            <input type="date" name="work_experience[${workExperienceIndex}][start_date]">
+            <input type="date" name="experience[${workExperienceIndex}][job_start_date]">
           </div>
           <div class="form-group">
             <label>End Date</label>
-            <input type="date" name="work_experience[${workExperienceIndex}][end_date]">
+            <input type="date" name="experience[${workExperienceIndex}][job_end_date]">
           </div>
           <div class="form-group">
             <label>
-              <input type="checkbox" name="work_experience[${workExperienceIndex}][currently_working]">
+              <input type="checkbox" name="experience[${workExperienceIndex}][currently_work]">
               Currently Working
             </label>
           </div>
           <div class="form-group full-width">
             <label>Description</label>
-            <textarea name="work_experience[${workExperienceIndex}][description]" rows="3"></textarea>
+            <textarea name="experience[${workExperienceIndex}][job_description]" rows="3"></textarea>
           </div>
         </div>
         <button type="button" onclick="removeItem(this)" class="btn btn-danger btn-sm">Remove</button>
@@ -310,23 +275,15 @@
           </div>
           <div class="form-group">
             <label>Institution *</label>
-            <input type="text" name="education[${educationIndex}][institution]" required>
+            <input type="text" name="education[${educationIndex}][institution_name]" required>
           </div>
           <div class="form-group">
-            <label>Specialization</label>
-            <input type="text" name="education[${educationIndex}][specialization]">
+            <label>Graduation Year</label>
+            <input type="number" name="education[${educationIndex}][graduation_year]" min="1900" max="2100">
           </div>
           <div class="form-group">
-            <label>Start Year</label>
-            <input type="number" name="education[${educationIndex}][start_year]">
-          </div>
-          <div class="form-group">
-            <label>End Year</label>
-            <input type="number" name="education[${educationIndex}][end_year]">
-          </div>
-          <div class="form-group">
-            <label>CGPA/Percentage</label>
-            <input type="text" name="education[${educationIndex}][cgpa_percentage]">
+            <label>Grade</label>
+            <input type="text" name="education[${educationIndex}][grade]">
           </div>
         </div>
         <button type="button" onclick="removeItem(this)" class="btn btn-danger btn-sm">Remove</button>
@@ -347,20 +304,6 @@
           <div class="form-group">
             <label>Skill Name *</label>
             <input type="text" name="skills[${skillIndex}][skill_name]" required>
-          </div>
-          <div class="form-group">
-            <label>Proficiency Level</label>
-            <select name="skills[${skillIndex}][proficiency_level]">
-              <option value="">Select</option>
-              <option value="Beginner">Beginner</option>
-              <option value="Intermediate">Intermediate</option>
-              <option value="Advanced">Advanced</option>
-              <option value="Expert">Expert</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label>Years of Experience</label>
-            <input type="number" name="skills[${skillIndex}][years_of_experience]" step="0.5">
           </div>
         </div>
         <button type="button" onclick="removeItem(this)" class="btn btn-danger btn-sm">Remove</button>

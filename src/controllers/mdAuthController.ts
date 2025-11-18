@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import { mysqlPool } from '../db/mysql';
+import { authenticateMD } from '../services/authService';
 
 /**
  * Handle MD login authentication
@@ -8,30 +8,30 @@ export const handleMDLogin = async (req: Request, res: Response) => {
   const { username, password } = req.body;
 
   try {
-    const connection = await mysqlPool.getConnection();
-    
-    // Query director table for MD authentication
-    const query = 'SELECT * FROM director WHERE username = ? AND password = ?';
-    const [rows] = await connection.execute(query, [username, password]);
-    connection.release();
+    const result = await authenticateMD(username, password);
 
-    if (Array.isArray(rows) && rows.length > 0) {
-      const result = rows[0] as any;
-      
-      // Set MD session
-      req.session.userId = result.id;
-      req.session.userType = 'md';
-      (req.session as any).username = username;
-      
-      res.redirect('/md-dashboard');
-    } else {
-      res.render('md/md-login', {
-        error: 'Invalid MD credentials'
+    if (!result.valid || !result.user) {
+      return res.status(401).render('md/md-login', {
+        error: result.error || 'Invalid MD credentials'
       });
     }
+
+    const user = result.user;
+    req.session.userId = user.id;
+    req.session.userType = 'md';
+    (req.session as any).username = username;
+
+    req.session.save(err => {
+      if (err) {
+        return res.status(500).render('md/md-login', {
+          error: 'Session error. Please try again.'
+        });
+      }
+      res.redirect('/md-dashboard');
+    });
   } catch (error) {
     console.error('MD login error:', error);
-    res.render('md/md-login', {
+    res.status(500).render('md/md-login', {
       error: 'Login failed. Please try again.'
     });
   }
