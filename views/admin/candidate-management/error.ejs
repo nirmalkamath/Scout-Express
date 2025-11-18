@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= pageTitle %> • Scout Express</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="stylesheet" href="/css/admin.css">
+  <link rel="stylesheet" href="/css/candidate-management.css">
+</head>
+<body>
+  <%- include('../admin-header') %>
+  
+  <div class="admin-layout">
+    <%- include('../admin-sidebar', { activePage: 'candidates' }) %>
+    
+    <main class="admin-main">
+      <div class="admin-content">
+        <div class="content-header">
+          <h1>Error</h1>
+          <div class="header-actions">
+            <a href="/admin/candidates" class="btn btn-secondary">← Back to Candidates</a>
+          </div>
+        </div>
+
+        <div class="error-container">
+          <div class="error-card">
+            <div class="error-icon">⚠️</div>
+            <h2><%= message %></h2>
+            <p>Something went wrong while processing your request. Please try again later.</p>
+            <div class="error-actions">
+              <a href="/admin/candidates" class="btn btn-primary">Go to Candidates List</a>
+              <a href="/admin-dashboard" class="btn btn-secondary">Go to Dashboard</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <%- include('../admin-footer') %>
+</body>
+</html>

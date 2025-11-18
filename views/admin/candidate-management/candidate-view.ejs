@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= pageTitle %> • Scout Express</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="stylesheet" href="/css/admin.css">
+  <link rel="stylesheet" href="/css/candidate-management.css">
+</head>
+<body>
+  <%- include('../admin-header') %>
+  
+  <div class="admin-layout">
+    <%- include('../admin-sidebar', { activePage: 'candidates' }) %>
+    
+    <main class="admin-main">
+      <div class="admin-content">
+        <div class="content-header">
+          <h1>Candidate Details</h1>
+          <div class="header-actions">
+            <a href="/admin/candidates" class="btn btn-secondary">← Back to List</a>
+            <a href="/admin/candidates/<%= candidate.id %>/edit" class="btn btn-primary">Edit Candidate</a>
+          </div>
+        </div>
+
+        <!-- Candidate Profile Card -->
+        <div class="candidate-profile-card">
+          <div class="profile-header">
+            <div class="profile-info">
+              <h2><%= candidate.full_name %></h2>
+              <p class="professional-headline"><%= candidate.professional_headline || 'No headline provided' %></p>
+              <div class="contact-info">
+                <p><strong>Email:</strong> <%= candidate.email %></p>
+                <p><strong>Phone:</strong> <%= candidate.phone_number %></p>
+                <p><strong>Location:</strong> <%= candidate.city %>, <%= candidate.country %></p>
+              </div>
+            </div>
+            <div class="profile-status">
+              <p><strong>Registered:</strong> <%= new Date(candidate.created_at).toLocaleDateString() %></p>
+            </div>
+          </div>
+
+          <!-- Professional Summary -->
+          <% if (candidate.professional_summary) { %>
+            <div class="section">
+              <h3>Professional Summary</h3>
+              <div class="summary-content">
+                <p><%= candidate.professional_summary %></p>
+              </div>
+            </div>
+          <% } %>
+
+          <!-- Work Experience -->
+          <% if (candidate.work_experience && candidate.work_experience.length > 0) { %>
+            <div class="section">
+              <h3>Work Experience</h3>
+              <div class="experience-list">
+                <% candidate.work_experience.forEach(work => { %>
+                  <div class="experience-item">
+                    <h4><%= work.position %> at <%= work.company %></h4>
+                    <p class="duration">
+                      <%= new Date(work.start_date).toLocaleDateString() %> - 
+                      <% if (work.currently_working === 'on') { %>
+                        Present
+                      <% } else { %>
+                        <%= new Date(work.end_date).toLocaleDateString() %>
+                      <% } %>
+                    </p>
+                    <% if (work.description) { %>
+                      <p class="description"><%= work.description %></p>
+                    <% } %>
+                  </div>
+                <% }); %>
+              </div>
+            </div>
+          <% } %>
+
+          <!-- Education -->
+          <% if (candidate.education && candidate.education.length > 0) { %>
+            <div class="section">
+              <h3>Education</h3>
+              <div class="education-list">
+                <% candidate.education.forEach(edu => { %>
+                  <div class="education-item">
+                    <h4><%= edu.degree %></h4>
+                    <p><%= edu.institution %></p>
+                    <% if (edu.specialization) { %>
+                      <p><strong>Specialization:</strong> <%= edu.specialization %></p>
+                    <% } %>
+                    <p><%= edu.start_year %> - <%= edu.end_year || 'Present' %></p>
+                    <% if (edu.cgpa_percentage) { %>
+                      <p><strong>CGPA/Percentage:</strong> <%= edu.cgpa_percentage %></p>
+                    <% } %>
+                  </div>
+                <% }); %>
+              </div>
+            </div>
+          <% } %>
+
+          <!-- Skills -->
+          <% if (candidate.skills && candidate.skills.length > 0) { %>
+            <div class="section">
+              <h3>Skills</h3>
+              <div class="skills-grid">
+                <% candidate.skills.forEach(skill => { %>
+                  <div class="skill-item">
+                    <h4><%= skill.skill_name %></h4>
+                    <% if (skill.proficiency_level) { %>
+                      <p><strong>Proficiency:</strong> <%= skill.proficiency_level %></p>
+                    <% } %>
+                    <% if (skill.years_of_experience) { %>
+                      <p><strong>Experience:</strong> <%= skill.years_of_experience %> years</p>
+                    <% } %>
+                  </div>
+                <% }); %>
+              </div>
+            </div>
+          <% } %>
+
+          <!-- Job Preferences -->
+          <% if (candidate.job_preferences) { %>
+            <div class="section">
+              <h3>Job Preferences</h3>
+              <div class="preferences-grid">
+                <% if (candidate.job_preferences.expected_salary) { %>
+                  <div class="preference-item">
+                    <strong>Expected Salary:</strong> <%= candidate.job_preferences.expected_salary %>
+                  </div>
+                <% } %>
+                <% if (candidate.job_preferences.availability) { %>
+                  <div class="preference-item">
+                    <strong>Availability:</strong> <%= candidate.job_preferences.availability %>
+                  </div>
+                <% } %>
+              </div>
+            </div>
+          <% } %>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <%- include('../admin-footer') %>
+</body>
+</html>

@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= pageTitle %> • Scout Express</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="stylesheet" href="/css/admin.css">
+  <link rel="stylesheet" href="/css/candidate-management.css">
+</head>
+<body>
+  <%- include('../admin-header') %>
+  
+  <div class="admin-layout">
+    <%- include('../admin-sidebar', { activePage: 'candidates' }) %>
+    
+    <main class="admin-main">
+      <div class="admin-content">
+        <div class="content-header">
+          <h1>Edit Candidate</h1>
+          <div class="header-actions">
+            <a href="/admin/candidates/<%= candidate.id %>" class="btn btn-secondary">← Back to View</a>
+            <a href="/admin/candidates" class="btn btn-secondary">← Back to List</a>
+          </div>
+        </div>
+
+        <!-- Edit Form -->
+        <div class="edit-form-container">
+          <form method="POST" action="/admin/candidates/<%= candidate.id %>/update" class="candidate-edit-form">
+            
+            <!-- Basic Information -->
+            <div class="form-section">
+              <h3>Basic Information</h3>
+              <div class="form-grid">
+                <div class="form-group">
+                  <label for="full_name">Full Name *</label>
+                  <input type="text" id="full_name" name="full_name" value="<%= candidate.full_name %>" required>
+                </div>
+                <div class="form-group">
+                  <label for="email">Email *</label>
+                  <input type="email" id="email" name="email" value="<%= candidate.email %>" required>
+                </div>
+                <div class="form-group">
+                  <label for="phone_number">Phone Number *</label>
+                  <input type="tel" id="phone_number" name="phone_number" value="<%= candidate.phone_number %>" required>
+                </div>
+                <div class="form-group">
+                  <label for="professional_headline">Professional Headline</label>
+                  <input type="text" id="professional_headline" name="professional_headline" value="<%= candidate.professional_headline || '' %>">
+                </div>
+              </div>
+              <div class="form-group full-width">
+                <label for="professional_summary">Professional Summary</label>
+                <textarea id="professional_summary" name="professional_summary" rows="4"><%= candidate.professional_summary || '' %></textarea>
+              </div>
+            </div>
+
+            <!-- Location Information -->
+            <div class="form-section">
+              <h3>Location Information</h3>
+              <div class="form-grid">
+                <div class="form-group">
+                  <label for="city">City</label>
+                  <input type="text" id="city" name="city" value="<%= candidate.city || '' %>">
+                </div>
+                <div class="form-group">
+                  <label for="district">District</label>
+                  <input type="text" id="district" name="district" value="<%= candidate.district || '' %>">
+                </div>
+                <div class="form-group">
+                  <label for="state">State</label>
+                  <input type="text" id="state" name="state" value="<%= candidate.state || '' %>">
+                </div>
+                <div class="form-group">
+                  <label for="country">Country</label>
+                  <input type="text" id="country" name="country" value="<%= candidate.country || '' %>">
+                </div>
+                <div class="form-group">
+                  <label for="pin_code">PIN Code</label>
+                  <input type="text" id="pin_code" name="pin_code" value="<%= candidate.pin_code || '' %>">
+                </div>
+              </div>
+            </div>
+
+            <!-- Work Experience -->
+            <div class="form-section">
+              <h3>Work Experience</h3>
+              <div id="work-experience-container">
+                <% if (candidate.work_experience && candidate.work_experience.length > 0) { %>
+                  <% candidate.work_experience.forEach((work, index) => { %>
+                    <div class="work-experience-item" data-index="<%= index %>">
+                      <div class="form-grid">
+                        <div class="form-group">
+                          <label>Company *</label>
+                          <input type="text" name="work_experience[<%= index %>][company]" value="<%= work.company %>" required>
+                        </div>
+                        <div class="form-group">
+                          <label>Position *</label>
+                          <input type="text" name="work_experience[<%= index %>][position]" value="<%= work.position %>" required>
+                        </div>
+                        <div class="form-group">
+                          <label>Start Date</label>
+                          <input type="date" name="work_experience[<%= index %>][start_date]" value="<%= work.start_date || '' %>">
+                        </div>
+                        <div class="form-group">
+                          <label>End Date</label>
+                          <input type="date" name="work_experience[<%= index %>][end_date]" value="<%= work.end_date || '' %>">
+                        </div>
+                        <div class="form-group">
+                          <label>
+                            <input type="checkbox" name="work_experience[<%= index %>][currently_working]" <%= work.currently_working === 'on' ? 'checked' : '' %>>
+                            Currently Working
+                          </label>
+                        </div>
+                        <div class="form-group full-width">
+                          <label>Description</label>
+                          <textarea name="work_experience[<%= index %>][description]" rows="3"><%= work.description || '' %></textarea>
+                        </div>
+                      </div>
+                    </div>
+                  <% }); %>
+                <% } %>
+              </div>
+              <button type="button" onclick="addWorkExperience()" class="btn btn-secondary">Add Work Experience</button>
+            </div>
+
+            <!-- Education -->
+            <div class="form-section">
+              <h3>Education</h3>
+              <div id="education-container">
+                <% if (candidate.education && candidate.education.length > 0) { %>
+                  <% candidate.education.forEach((edu, index) => { %>
+                    <div class="education-item" data-index="<%= index %>">
+                      <div class="form-grid">
+                        <div class="form-group">
+                          <label>Degree *</label>
+                          <input type="text" name="education[<%= index %>][degree]" value="<%= edu.degree %>" required>
+                        </div>
+                        <div class="form-group">
+                          <label>Institution *</label>
+                          <input type="text" name="education[<%= index %>][institution]" value="<%= edu.institution %>" required>
+                        </div>
+                        <div class="form-group">
+                          <label>Specialization</label>
+                          <input type="text" name="education[<%= index %>][specialization]" value="<%= edu.specialization || '' %>">
+                        </div>
+                        <div class="form-group">
+                          <label>Start Year</label>
+                          <input type="number" name="education[<%= index %>][start_year]" value="<%= edu.start_year || '' %>">
+                        </div>
+                        <div class="form-group">
+                          <label>End Year</label>
+                          <input type="number" name="education[<%= index %>][end_year]" value="<%= edu.end_year || '' %>">
+                        </div>
+                        <div class="form-group">
+                          <label>CGPA/Percentage</label>
+                          <input type="text" name="education[<%= index %>][cgpa_percentage]" value="<%= edu.cgpa_percentage || '' %>">
+                        </div>
+                      </div>
+                    </div>
+                  <% }); %>
+                <% } %>
+              </div>
+              <button type="button" onclick="addEducation()" class="btn btn-secondary">Add Education</button>
+            </div>
+
+            <!-- Skills -->
+            <div class="form-section">
+              <h3>Skills</h3>
+              <div id="skills-container">
+                <% if (candidate.skills && candidate.skills.length > 0) { %>
+                  <% candidate.skills.forEach((skill, index) => { %>
+                    <div class="skill-item" data-index="<%= index %>">
+                      <div class="form-grid">
+                        <div class="form-group">
+                          <label>Skill Name *</label>
+                          <input type="text" name="skills[<%= index %>][skill_name]" value="<%= skill.skill_name %>" required>
+                        </div>
+                        <div class="form-group">
+                          <label>Proficiency Level</label>
+                          <select name="skills[<%= index %>][proficiency_level]">
+                            <option value="">Select</option>
+                            <option value="Beginner" <%= skill.proficiency_level === 'Beginner' ? 'selected' : '' %>>Beginner</option>
+                            <option value="Intermediate" <%= skill.proficiency_level === 'Intermediate' ? 'selected' : '' %>>Intermediate</option>
+                            <option value="Advanced" <%= skill.proficiency_level === 'Advanced' ? 'selected' : '' %>>Advanced</option>
+                            <option value="Expert" <%= skill.proficiency_level === 'Expert' ? 'selected' : '' %>>Expert</option>
+                          </select>
+                        </div>
+                        <div class="form-group">
+                          <label>Years of Experience</label>
+                          <input type="number" name="skills[<%= index %>][years_of_experience]" value="<%= skill.years_of_experience || '' %>" step="0.5">
+                        </div>
+                      </div>
+                    </div>
+                  <% }); %>
+                <% } %>
+              </div>
+              <button type="button" onclick="addSkill()" class="btn btn-secondary">Add Skill</button>
+            </div>
+
+            <!-- Job Preferences -->
+            <div class="form-section">
+              <h3>Job Preferences</h3>
+              <div class="form-grid">
+                <div class="form-group">
+                  <label for="job_type">Job Type</label>
+                  <select id="job_type" name="job_preferences[job_type]">
+                    <option value="">Select</option>
+                    <option value="Full-time" <%= candidate.job_preferences && candidate.job_preferences.job_type === 'Full-time' ? 'selected' : '' %>>Full-time</option>
+                    <option value="Part-time" <%= candidate.job_preferences && candidate.job_preferences.job_type === 'Part-time' ? 'selected' : '' %>>Part-time</option>
+                    <option value="Contract" <%= candidate.job_preferences && candidate.job_preferences.job_type === 'Contract' ? 'selected' : '' %>>Contract</option>
+                    <option value="Internship" <%= candidate.job_preferences && candidate.job_preferences.job_type === 'Internship' ? 'selected' : '' %>>Internship</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label for="preferred_location">Preferred Location</label>
+                  <input type="text" id="preferred_location" name="job_preferences[preferred_location]" value="<%= candidate.job_preferences && candidate.job_preferences.preferred_location || '' %>">
+                </div>
+                <div class="form-group">
+                  <label for="expected_salary">Expected Salary</label>
+                  <input type="text" id="expected_salary" name="job_preferences[expected_salary]" value="<%= candidate.job_preferences && candidate.job_preferences.expected_salary || '' %>">
+                </div>
+                <div class="form-group">
+                  <label for="notice_period">Notice Period</label>
+                  <input type="text" id="notice_period" name="job_preferences[notice_period]" value="<%= candidate.job_preferences && candidate.job_preferences.notice_period || '' %>">
+                </div>
+                <div class="form-group">
+                  <label for="work_mode">Work Mode</label>
+                  <select id="work_mode" name="job_preferences[work_mode]">
+                    <option value="">Select</option>
+                    <option value="Remote" <%= candidate.job_preferences && candidate.job_preferences.work_mode === 'Remote' ? 'selected' : '' %>>Remote</option>
+                    <option value="Office" <%= candidate.job_preferences && candidate.job_preferences.work_mode === 'Office' ? 'selected' : '' %>>Office</option>
+                    <option value="Hybrid" <%= candidate.job_preferences && candidate.job_preferences.work_mode === 'Hybrid' ? 'selected' : '' %>>Hybrid</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            <!-- Form Actions -->
+            <div class="form-actions">
+              <button type="submit" class="btn btn-primary">Save Changes</button>
+              <a href="/admin/candidates/<%= candidate.id %>" class="btn btn-secondary">Cancel</a>
+            </div>
+          </form>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <%- include('../admin-footer') %>
+
+  <script>
+    let workExperienceIndex = <%= candidate.work_experience ? candidate.work_experience.length : 0 %>;
+    let educationIndex = <%= candidate.education ? candidate.education.length : 0 %>;
+    let skillIndex = <%= candidate.skills ? candidate.skills.length : 0 %>;
+
+    function addWorkExperience() {
+      const container = document.getElementById('work-experience-container');
+      const item = document.createElement('div');
+      item.className = 'work-experience-item';
+      item.dataset.index = workExperienceIndex;
+      
+      item.innerHTML = `
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Company *</label>
+            <input type="text" name="work_experience[${workExperienceIndex}][company]" required>
+          </div>
+          <div class="form-group">
+            <label>Position *</label>
+            <input type="text" name="work_experience[${workExperienceIndex}][position]" required>
+          </div>
+          <div class="form-group">
+            <label>Start Date</label>
+            <input type="date" name="work_experience[${workExperienceIndex}][start_date]">
+          </div>
+          <div class="form-group">
+            <label>End Date</label>
+            <input type="date" name="work_experience[${workExperienceIndex}][end_date]">
+          </div>
+          <div class="form-group">
+            <label>
+              <input type="checkbox" name="work_experience[${workExperienceIndex}][currently_working]">
+              Currently Working
+            </label>
+          </div>
+          <div class="form-group full-width">
+            <label>Description</label>
+            <textarea name="work_experience[${workExperienceIndex}][description]" rows="3"></textarea>
+          </div>
+        </div>
+        <button type="button" onclick="removeItem(this)" class="btn btn-danger btn-sm">Remove</button>
+      `;
+      
+      container.appendChild(item);
+      workExperienceIndex++;
+    }
+
+    function addEducation() {
+      const container = document.getElementById('education-container');
+      const item = document.createElement('div');
+      item.className = 'education-item';
+      item.dataset.index = educationIndex;
+      
+      item.innerHTML = `
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Degree *</label>
+            <input type="text" name="education[${educationIndex}][degree]" required>
+          </div>
+          <div class="form-group">
+            <label>Institution *</label>
+            <input type="text" name="education[${educationIndex}][institution]" required>
+          </div>
+          <div class="form-group">
+            <label>Specialization</label>
+            <input type="text" name="education[${educationIndex}][specialization]">
+          </div>
+          <div class="form-group">
+            <label>Start Year</label>
+            <input type="number" name="education[${educationIndex}][start_year]">
+          </div>
+          <div class="form-group">
+            <label>End Year</label>
+            <input type="number" name="education[${educationIndex}][end_year]">
+          </div>
+          <div class="form-group">
+            <label>CGPA/Percentage</label>
+            <input type="text" name="education[${educationIndex}][cgpa_percentage]">
+          </div>
+        </div>
+        <button type="button" onclick="removeItem(this)" class="btn btn-danger btn-sm">Remove</button>
+      `;
+      
+      container.appendChild(item);
+      educationIndex++;
+    }
+
+    function addSkill() {
+      const container = document.getElementById('skills-container');
+      const item = document.createElement('div');
+      item.className = 'skill-item';
+      item.dataset.index = skillIndex;
+      
+      item.innerHTML = `
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Skill Name *</label>
+            <input type="text" name="skills[${skillIndex}][skill_name]" required>
+          </div>
+          <div class="form-group">
+            <label>Proficiency Level</label>
+            <select name="skills[${skillIndex}][proficiency_level]">
+              <option value="">Select</option>
+              <option value="Beginner">Beginner</option>
+              <option value="Intermediate">Intermediate</option>
+              <option value="Advanced">Advanced</option>
+              <option value="Expert">Expert</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Years of Experience</label>
+            <input type="number" name="skills[${skillIndex}][years_of_experience]" step="0.5">
+          </div>
+        </div>
+        <button type="button" onclick="removeItem(this)" class="btn btn-danger btn-sm">Remove</button>
+      `;
+      
+      container.appendChild(item);
+      skillIndex++;
+    }
+
+    function removeItem(button) {
+      button.parentElement.remove();
+    }
+  </script>
+</body>
+</html>

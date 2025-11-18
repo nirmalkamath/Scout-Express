@@ -5,6 +5,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.ServiceError = void 0;
 exports.registerCandidate = registerCandidate;
+exports.getCandidateBasicInfo = getCandidateBasicInfo;
 exports.updateCandidate = updateCandidate;
 const bcryptjs_1 = __importDefault(require("bcryptjs"));
 const zod_1 = require("zod");
@@ -35,7 +36,7 @@ const updateSchema = zod_1.z.object({
     city: zod_1.z.string().min(1, 'City is required'),
     pin_code: zod_1.z.string().regex(/^[0-9]{6}$/, 'Enter a valid 6-digit PIN code'),
     email: zod_1.z.string().email('Enter a valid email address'),
-    password: zod_1.z.string().min(8, 'Password must be at least 8 characters long')
+    password: zod_1.z.string().min(8, 'Password must be at least 8 characters long').optional()
 });
 class ServiceError extends Error {
     constructor(statusCode, message) {
@@ -89,19 +90,48 @@ async function registerCandidate(payload, files) {
     const [insertResult] = await mysql_1.mysqlPool.execute(sql, values);
     return insertResult.insertId;
 }
+async function getCandidateBasicInfo(candidateId) {
+    try {
+        const [rows] = await mysql_1.mysqlPool.execute(`SELECT 
+        full_name, 
+        professional_headline, 
+        professional_summary, 
+        phone_number, 
+        country, 
+        state, 
+        district, 
+        city, 
+        pin_code, 
+        email,
+        resume
+      FROM candidates 
+      WHERE id = ?`, [candidateId]);
+        if (rows.length > 0) {
+            return rows[0];
+        }
+        return null;
+    }
+    catch (error) {
+        console.error('Error fetching candidate basic info:', error);
+        return null;
+    }
+}
 async function updateCandidate(candidateId, payload, files) {
     const dbOk = await (0, mysql_1.pingDatabase)();
     if (!dbOk) {
         throw new ServiceError(500, 'Database connection unavailable. Please try again later.');
     }
-    const result = signupSchema.safeParse(payload);
+    const result = updateSchema.safeParse(payload);
     if (!result.success) {
         const errorMsg = result.error.issues.map((issue) => issue.message).join('<br>');
         throw new ServiceError(400, errorMsg);
     }
     const resumeFile = files?.resume?.[0];
     const photoFile = files?.photo?.[0];
-    const hashedPassword = await bcryptjs_1.default.hash(result.data.password, 10);
+    let hashedPassword = null;
+    if (result.data.password) {
+        hashedPassword = await bcryptjs_1.default.hash(result.data.password, 10);
+    }
     const updateFields = [
         'full_name = ?',
         'professional_headline = ?',
@@ -113,7 +143,6 @@ async function updateCandidate(candidateId, payload, files) {
         'country = ?',
         'pin_code = ?',
         'email = ?',
-        'password = ?'
     ];
     const values = [
         result.data.full_name,
@@ -125,9 +154,12 @@ async function updateCandidate(candidateId, payload, files) {
         result.data.district,
         result.data.country,
         result.data.pin_code,
-        result.data.email,
-        hashedPassword
+        result.data.email
     ];
+    if (hashedPassword) {
+        updateFields.push('password = ?');
+        values.push(hashedPassword);
+    }
     if (photoFile) {
         updateFields.push('photo = ?');
         values.push(photoFile.filename);

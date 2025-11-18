@@ -173,16 +173,34 @@ document.addEventListener('DOMContentLoaded', function () {
         const startDate = entry.querySelector(`#start_date_${entryIndex}`);
         const endDate = entry.querySelector(`#end_date_${entryIndex}`);
         const currentlyWorking = entry.querySelector(`#currently_working_${entryIndex}`);
+        const endDateError = endDate ? endDate.nextElementSibling : null;
 
-        if (startDate.value && endDate.value && !currentlyWorking.checked) {
+        // Check if either end date is provided or 'I currently work here' is checked
+        if (!currentlyWorking.checked && (!endDate || !endDate.value)) {
+          if (endDate) {
+            endDate.classList.add('is-invalid');
+            if (endDateError) {
+              endDateError.textContent = 'Please provide an end date or check "I currently work here"';
+              endDateError.style.display = 'block';
+            }
+            valid = false;
+          }
+        } else if (startDate && endDate && endDate.value && !currentlyWorking.checked) {
+          // Validate end date is after start date if provided
           if (new Date(startDate.value) > new Date(endDate.value)) {
             endDate.classList.add('is-invalid');
-            endDate.nextElementSibling.style.display = 'block';
+            if (endDateError) {
+              endDateError.textContent = 'End date cannot be before start date';
+              endDateError.style.display = 'block';
+            }
             valid = false;
           } else {
             endDate.classList.remove('is-invalid');
-            endDate.nextElementSibling.style.display = 'none';
+            if (endDateError) endDateError.style.display = 'none';
           }
+        } else {
+          if (endDate) endDate.classList.remove('is-invalid');
+          if (endDateError) endDateError.style.display = 'none';
         }
       });
 

@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= pageTitle %> • Scout Express</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="stylesheet" href="/css/admin.css">
+  <link rel="stylesheet" href="/css/candidate-management.css">
+</head>
+<body>
+  <%- include('../admin-header') %>
+  
+  <div class="admin-layout">
+    <%- include('../admin-sidebar', { activePage: 'candidates' }) %>
+    
+    <main class="admin-main">
+      <div class="admin-content">
+        <div class="content-header">
+          <h1>Candidate Management</h1>
+          <div class="header-actions">
+            <a href="/admin/candidates/export" class="btn btn-secondary">Export CSV</a>
+          </div>
+        </div>
+
+        <!-- Search and Filters -->
+        <div class="search-filters">
+          <form method="GET" action="/admin/candidates" class="search-form">
+            <div class="filter-group">
+              <input type="text" name="search" placeholder="Search by name, email, or headline..." value="<%= search %>" class="search-input">
+              <button type="submit" class="btn btn-primary">Search</button>
+              <a href="/admin/candidates" class="btn btn-secondary">Clear</a>
+            </div>
+          </form>
+        </div>
+
+        <!-- Candidates Table -->
+        <div class="candidates-table-container">
+          <table class="candidates-table">
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Phone</th>
+                <th>Location</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% if (candidates && candidates.length > 0) { %>
+                <% candidates.forEach(candidate => { %>
+                  <tr>
+                    <td>
+                      <div class="candidate-name">
+                        <strong><%= candidate.full_name %></strong>
+                      </div>
+                    </td>
+                    <td><%= candidate.email %></td>
+                    <td><%= candidate.phone_number %></td>
+                    
+                    <td><%= candidate.city %>, <%= candidate.country %></td>
+                    <!--<td><%= new Date(candidate.created_at).toLocaleDateString() %></td>-->
+                    <td class="actions">
+                      <button onclick="window.location.href='/admin/candidates/<%= candidate.id %>'" class="btn btn-sm btn-primary">View</button>
+                      <button onclick="window.location.href='/admin/candidates/<%= candidate.id %>/edit'" class="btn btn-sm btn-secondary">Edit</button>
+                      <button class="btn btn-sm status-toggle <%= candidate.is_disabled ? 'btn-success' : 'btn-warning' %>" 
+                              data-candidate-id="<%= candidate.id %>" 
+                              data-is-disabled="<%= candidate.is_disabled %>">
+                        <%= candidate.is_disabled ? 'Enable' : 'Disable' %>
+                      </button>
+                    </td>
+                  </tr>
+                <% }); %>
+              <% } else { %>
+                <tr>
+                  <td colspan="7" class="no-data">
+                    <div class="no-data-message">
+                      <p>No candidates found matching your criteria.</p>
+                    </div>
+                  </td>
+                </tr>
+              <% } %>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Pagination -->
+        <% if (pagination && pagination.totalPages > 1) { %>
+          <div class="pagination">
+            <% if (pagination.currentPage > 1) { %>
+              <a href="?page=<%= pagination.currentPage - 1 %>&search=<%= search %>" class="pagination-link">Previous</a>
+            <% } %>
+            
+            <% for (let i = 1; i <= pagination.totalPages; i++) { %>
+              <% if (i === pagination.currentPage) { %>
+                <span class="pagination-current"><%= i %></span>
+              <% } else { %>
+                <a href="?page=<%= i %>&search=<%= search %>" class="pagination-link"><%= i %></a>
+              <% } %>
+            <% } %>
+            
+            <% if (pagination.currentPage < pagination.totalPages) { %>
+              <a href="?page=<%= pagination.currentPage + 1 %>&search=<%= search %>" class="pagination-link">Next</a>
+            <% } %>
+          </div>
+        <% } %>
+      </div>
+    </main>
+  </div>
+
+  <%- include('../admin-footer') %>
+
+  <script>
+    // Handle enable/disable toggle button
+    document.addEventListener('DOMContentLoaded', function() {
+      const toggleButtons = document.querySelectorAll('.status-toggle');
+      
+      toggleButtons.forEach(button => {
+        button.addEventListener('click', function(e) {
+          e.preventDefault();
+          
+          const candidateId = this.getAttribute('data-candidate-id');
+          const isCurrentlyDisabled = this.getAttribute('data-is-disabled') === '1';
+          const newDisabledState = !isCurrentlyDisabled;
+          
+          // Show loading state
+          const originalText = this.textContent;
+          this.textContent = 'Updating...';
+          this.disabled = true;
+          
+          // Send request to update status
+          fetch(`/admin/candidates/${candidateId}/status`, {
+            method: 'PUT',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ is_disabled: newDisabledState })
+          })
+          .then(response => response.json())
+          .then(data => {
+            if (data.success) {
+              // Update button state
+              this.setAttribute('data-is-disabled', newDisabledState ? '1' : '0');
+              this.textContent = newDisabledState ? 'Enable' : 'Disable';
+              
+              // Toggle button styling
+              if (newDisabledState) {
+                this.classList.remove('btn-warning');
+                this.classList.add('btn-success');
+              } else {
+                this.classList.remove('btn-success');
+                this.classList.add('btn-warning');
+              }
+              
+              // Toggle visual feedback on row
+              const row = this.closest('tr');
+              if (newDisabledState) {
+                row.classList.add('table-secondary');
+              } else {
+                row.classList.remove('table-secondary');
+              }
+            } else {
+              // Revert on error
+              this.textContent = originalText;
+              alert('Failed to update candidate status: ' + (data.message || 'Unknown error'));
+            }
+          })
+          .catch(error => {
+            console.error('Error:', error);
+            this.textContent = originalText;
+            alert('An error occurred while updating the candidate status.');
+          })
+          .finally(() => {
+            this.disabled = false;
+          });
+        });
+      });
+    });
+  </script>
+
+  <script>
+    // Confirm delete
+    function confirmDelete(candidateId, candidateName) {
+      if (confirm(`Are you sure you want to delete ${candidateName}? This action cannot be undone.`)) {
+        fetch(`/admin/candidates/${candidateId}`, {
+          method: 'DELETE'
+        })
+        .then(response => response.json())
+        .then(data => {
+          if (data.success) {
+            alert('Candidate deleted successfully');
+            location.reload();
+          } else {
+            alert('Failed to delete candidate: ' + data.message);
+          }
+        })
+        .catch(error => {
+          console.error('Error:', error);
+          alert('An error occurred while deleting candidate');
+        });
+      }
+    }
+  </script>
+</body>
+</html>

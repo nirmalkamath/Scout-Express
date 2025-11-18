@@ -59,9 +59,9 @@
                   </div>
 
                   <div class="auth-field">
-                    <label for="end_date_<%= index %>">End Date</label>
-                    <input id="end_date_<%= index %>" name="work_experience[<%= index %>][end_date]" type="date" value="<%= exp.end_date || '' %>" <%= exp.currently_working === 'on' ? 'disabled' : '' %>>
-                    <span class="error-message">End date cannot be before start date.</span>
+                    <label for="end_date_<%= index %>">End Date <span class="required">*</span></label>
+                    <input id="end_date_<%= index %>" name="work_experience[<%= index %>][end_date]" type="date" value="<%= exp.end_date || '' %>" <%= exp.currently_working === 'on' ? 'disabled' : 'required' %> data-end-date>
+                    <span class="error-message">Please provide an end date or check 'I currently work here'.</span>
                   </div>
 
                   <div class="auth-field full-width">

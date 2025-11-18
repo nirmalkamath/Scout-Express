@@ -2,6 +2,7 @@ import 'dotenv/config';
 import express, { Express } from 'express';
 import configureExpress from './config/express';
 import routes from './routes';
+import { setupCandidateManagement } from './server-integration/candidateManagementServer';
 import { shutdownDatabase } from './db/mysql';
 
 const app: Express = express();
@@ -22,7 +23,8 @@ app.use(express.json());
 
 configureExpress(app);
 
-
+// Setup candidate management routes
+setupCandidateManagement(app);
 
 app.use('/', routes);
 
