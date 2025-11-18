@@ -5,5 +5,6 @@ declare module 'express-session' {
     candidateId?: number;
     userType?: string;
     userId?: number;
+    adminRole?: string;
   }
 }

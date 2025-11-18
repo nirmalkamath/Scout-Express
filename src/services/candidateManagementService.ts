@@ -118,6 +118,17 @@ export class CandidateManagementService {
       throw error;
     }
   }
+
+  // Get total candidates count
+  async getTotalCandidates(): Promise<number> {
+    try {
+      const [rows] = await mysqlPool.execute('SELECT COUNT(*) as total FROM candidates');
+      return (rows as any)[0].total as number;
+    } catch (error) {
+      console.error('Error fetching total candidates:', error);
+      throw error;
+    }
+  }
   
   // Update candidate
   async updateCandidate(id: number, data: any) {

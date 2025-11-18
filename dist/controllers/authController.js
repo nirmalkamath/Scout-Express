@@ -63,6 +63,7 @@ async function handleAdminLogin(req, res) {
         }
         req.session.userType = loginType;
         req.session.userId = authResult.user.id;
+        req.session.adminRole = authResult.user.role || 'super_admin';
         req.session.save(err => {
             if (err) {
                 return res.status(500).render('admin/admin-login', {
@@ -106,6 +107,7 @@ async function handleLogin(req, res) {
             user = result.user;
             req.session.userType = 'admin';
             req.session.userId = user.id;
+            req.session.adminRole = user.role || 'super_admin';
             redirectPath = '/admin-dashboard';
         }
         req.session.save(err => {

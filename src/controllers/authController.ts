@@ -71,6 +71,7 @@ export async function handleAdminLogin(req: Request, res: Response): Promise<voi
 
     req.session.userType = loginType;
     req.session.userId = authResult.user.id;
+    req.session.adminRole = authResult.user.role || 'super_admin';
 
     req.session.save(err => {
       if (err) {
@@ -121,6 +122,7 @@ export async function handleLogin(req: Request, res: Response): Promise<void> {
       user = result.user;
       req.session.userType = 'admin';
       req.session.userId = user.id;
+      req.session.adminRole = user.role || 'super_admin';
       redirectPath = '/admin-dashboard';
 
     }  

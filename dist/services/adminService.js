@@ -6,6 +6,10 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.changeAdminUsername = changeAdminUsername;
 exports.getAdminDetails = getAdminDetails;
 exports.changeAdminPassword = changeAdminPassword;
+exports.listAdmins = listAdmins;
+exports.createAdmin = createAdmin;
+exports.updateAdminRole = updateAdminRole;
+exports.deleteAdmin = deleteAdmin;
 const bcryptjs_1 = __importDefault(require("bcryptjs"));
 const mysql_1 = require("../db/mysql");
 async function changeAdminUsername(adminId, newUsername) {
@@ -29,7 +33,7 @@ async function changeAdminUsername(adminId, newUsername) {
 }
 async function getAdminDetails(adminId) {
     try {
-        const [rows] = await mysql_1.mysqlPool.execute('SELECT id, username FROM admin WHERE id = ?', [adminId]);
+        const [rows] = await mysql_1.mysqlPool.execute('SELECT id, username, role FROM admin WHERE id = ?', [adminId]);
         if (rows.length === 0) {
             return null;
         }
@@ -64,4 +68,34 @@ async function changeAdminPassword(adminId, currentPassword, newPassword) {
         console.error('Change password error:', error);
         return { success: false, error: 'Failed to update password' };
     }
+}
+async function listAdmins() {
+    const [rows] = await mysql_1.mysqlPool.execute('SELECT id, username, role FROM admin ORDER BY id ASC');
+    return rows;
+}
+async function createAdmin(username, password, role) {
+    if (!username || !password || !role) {
+        return { success: false, error: 'Invalid input' };
+    }
+    const [existing] = await mysql_1.mysqlPool.execute('SELECT id FROM admin WHERE username = ?', [username]);
+    if (existing.length > 0) {
+        return { success: false, error: 'Username already exists' };
+    }
+    const hashed = await bcryptjs_1.default.hash(password, 10);
+    await mysql_1.mysqlPool.execute('INSERT INTO admin (username, password, role) VALUES (?, ?, ?)', [username, hashed, role]);
+    return { success: true };
+}
+async function updateAdminRole(adminId, role) {
+    if (!adminId || !role) {
+        return { success: false, error: 'Invalid input' };
+    }
+    await mysql_1.mysqlPool.execute('UPDATE admin SET role = ? WHERE id = ?', [role, adminId]);
+    return { success: true };
+}
+async function deleteAdmin(adminId) {
+    if (!adminId) {
+        return { success: false, error: 'Invalid input' };
+    }
+    await mysql_1.mysqlPool.execute('DELETE FROM admin WHERE id = ?', [adminId]);
+    return { success: true };
 }

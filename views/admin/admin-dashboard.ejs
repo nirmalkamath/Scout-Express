@@ -24,6 +24,15 @@
             <h2>Welcome to Admin Dashboard</h2>
             <p>Select an option from the sidebar to manage your platform.</p>
           </div>
+
+          <div class="dashboard-grid" style="margin-top: 20px; display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px;">
+            <div class="dashboard-card">
+              <div class="card-title">👥 Total Candidates</div>
+              <div class="card-content">
+                <p style="font-size: 28px; font-weight: 700;"><%= typeof totalCandidates !== 'undefined' ? totalCandidates : 0 %></p>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 

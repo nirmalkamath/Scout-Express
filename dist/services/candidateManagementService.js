@@ -108,6 +108,17 @@ class CandidateManagementService {
             throw error;
         }
     }
+    // Get total candidates count
+    async getTotalCandidates() {
+        try {
+            const [rows] = await mysql_1.mysqlPool.execute('SELECT COUNT(*) as total FROM candidates');
+            return rows[0].total;
+        }
+        catch (error) {
+            console.error('Error fetching total candidates:', error);
+            throw error;
+        }
+    }
     // Update candidate
     async updateCandidate(id, data) {
         try {

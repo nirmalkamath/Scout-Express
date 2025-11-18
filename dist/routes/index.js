@@ -10,7 +10,9 @@ const authController_1 = require("../controllers/authController");
 const mdAuthController_1 = require("../controllers/mdAuthController");
 const adminController_1 = require("../controllers/adminController");
 const adminService_1 = require("../services/adminService");
+const candidateManagementService_1 = require("../services/candidateManagementService");
 const noCache_1 = require("../middlewares/noCache");
+const adminRoles_1 = require("../middlewares/adminRoles");
 const mdAuth_1 = require("../middlewares/mdAuth");
 const homeController_1 = require("../controllers/homeController");
 const workExperienceController_1 = require("../controllers/workExperienceController");
@@ -27,10 +29,19 @@ router.get('/admin-login', noCache_1.noCache, (req, res) => res.render('admin/ad
 router.post('/admin-login', authController_1.handleAdminLogin);
 router.get('/md-login', noCache_1.noCache, (req, res) => res.render('md/md-login'));
 router.post('/md-login', mdAuthController_1.handleMDLogin);
-router.get('/admin-dashboard', noCache_1.adminAuth, (req, res) => {
+router.get('/admin-dashboard', noCache_1.adminAuth, async (req, res) => {
+    let totalCandidates = 0;
+    try {
+        totalCandidates = await candidateManagementService_1.candidateManagementService.getTotalCandidates();
+    }
+    catch (e) {
+        // eslint-disable-next-line no-console
+        console.error('Failed to load total candidates:', e);
+    }
     res.render('admin/admin-dashboard', {
         success: req.query.success,
-        error: req.query.error
+        error: req.query.error,
+        totalCandidates
     });
 });
 router.get('/admin/settings', noCache_1.adminAuth, async (req, res) => {
@@ -41,10 +52,19 @@ router.get('/admin/settings', noCache_1.adminAuth, async (req, res) => {
         currentUsername: adminDetails?.username || ''
     });
 });
-router.get('/md-dashboard', mdAuth_1.mdAuth, (req, res) => {
+router.get('/md-dashboard', mdAuth_1.mdAuth, async (req, res) => {
+    let totalCandidates = 0;
+    try {
+        totalCandidates = await candidateManagementService_1.candidateManagementService.getTotalCandidates();
+    }
+    catch (e) {
+        // eslint-disable-next-line no-console
+        console.error('Failed to load total candidates:', e);
+    }
     res.render('md/md-dashboard', {
         success: req.query.success,
-        error: req.query.error
+        error: req.query.error,
+        totalCandidates
     });
 });
 router.post('/logout', (req, res) => {
@@ -65,6 +85,10 @@ router.post('/admin_logout', (req, res) => {
 });
 router.post('/admin/change-username', adminController_1.handleChangeUsername);
 router.post('/admin/change-password', adminController_1.handleChangePassword);
+router.get('/admin/admins', noCache_1.adminAuth, adminRoles_1.requireSuperAdmin, adminController_1.renderAdminUsers);
+router.post('/admin/admins/create', noCache_1.adminAuth, adminRoles_1.requireSuperAdmin, adminController_1.handleCreateAdmin);
+router.post('/admin/admins/:id/role', noCache_1.adminAuth, adminRoles_1.requireSuperAdmin, adminController_1.handleUpdateAdminRole);
+router.post('/admin/admins/:id/delete', noCache_1.adminAuth, adminRoles_1.requireSuperAdmin, adminController_1.handleDeleteAdmin);
 router.get('/signup', authController_1.renderSignup);
 router.post('/signup', upload_1.default.fields([
     { name: 'photo', maxCount: 1 },

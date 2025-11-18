@@ -34,5 +34,19 @@
         <span class="menu-text">Settings</span>
       </a>
     </li>
+    <li class="menu-item">
+      <a href="/admin/admins" class="menu-link <%= activePage === 'admins' ? 'active' : '' %>">
+        <span class="menu-icon">🛡️</span>
+        <span class="menu-text">Admins</span>
+      </a>
+    </li>
+    <li class="menu-item">
+      <form method="POST" action="/admin_logout" style="display: block;">
+        <button type="submit" class="menu-link" style="background: none; border: none; width: 100%; text-align: left; cursor: pointer;">
+          <span class="menu-icon">🚪</span>
+          <span class="menu-text">Logout</span>
+        </button>
+      </form>
+    </li>
   </ul>
 </nav>

@@ -9,6 +9,7 @@ import {
   exportCandidates
 } from '../controllers/candidateManagementController';
 import { adminAuth } from '../middlewares/noCache';
+import { requireAdminWrite } from '../middlewares/adminRoles';
 
 const router = Router();
 
@@ -28,12 +29,12 @@ router.get('/:id', viewCandidate);
 router.get('/:id/edit', editCandidateForm);
 
 // Update candidate
-router.post('/:id/update', updateCandidate);
+router.post('/:id/update', requireAdminWrite, updateCandidate);
 
 // Update candidate status (enable/disable)
-router.put('/:id/status', updateCandidateStatus);
+router.put('/:id/status', requireAdminWrite, updateCandidateStatus);
 
 // Delete candidate
-router.delete('/:id', deleteCandidate);
+router.delete('/:id', requireAdminWrite, deleteCandidate);
 
 export default router;

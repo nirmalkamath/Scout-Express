@@ -3,9 +3,11 @@ import { Router } from 'express';
 import { getDatabaseHealth } from '../controllers/healthController';
 import { handleLogin, handleAdminLogin, handleSignup, renderLogin, renderSignup } from '../controllers/authController';
 import { handleMDLogin } from '../controllers/mdAuthController';
-import { handleChangeUsername, handleChangePassword } from '../controllers/adminController';
+import { handleChangeUsername, handleChangePassword, renderAdminUsers, handleCreateAdmin, handleUpdateAdminRole, handleDeleteAdmin } from '../controllers/adminController';
 import { getAdminDetails } from '../services/adminService';
+import { candidateManagementService } from '../services/candidateManagementService';
 import { noCache, adminAuth } from '../middlewares/noCache';
+import { requireSuperAdmin } from '../middlewares/adminRoles';
 import { mdAuth } from '../middlewares/mdAuth';
 import { renderHome } from '../controllers/homeController';
 import { handleWorkExperience, renderWorkExperience } from '../controllers/workExperienceController';
@@ -24,10 +26,18 @@ router.get('/admin-login', noCache, (req, res) => res.render('admin/admin-login'
 router.post('/admin-login', handleAdminLogin);
 router.get('/md-login', noCache, (req, res) => res.render('md/md-login'));
 router.post('/md-login', handleMDLogin);
-router.get('/admin-dashboard', adminAuth, (req, res) => {
+router.get('/admin-dashboard', adminAuth, async (req, res) => {
+  let totalCandidates = 0;
+  try {
+    totalCandidates = await candidateManagementService.getTotalCandidates();
+  } catch (e) {
+    // eslint-disable-next-line no-console
+    console.error('Failed to load total candidates:', e);
+  }
   res.render('admin/admin-dashboard', {
     success: req.query.success,
-    error: req.query.error
+    error: req.query.error,
+    totalCandidates
   });
 });
 router.get('/admin/settings', adminAuth, async (req, res) => {
@@ -38,10 +48,18 @@ router.get('/admin/settings', adminAuth, async (req, res) => {
     currentUsername: adminDetails?.username || ''
   });
 });
-router.get('/md-dashboard', mdAuth, (req, res) => {
+router.get('/md-dashboard', mdAuth, async (req, res) => {
+  let totalCandidates = 0;
+  try {
+    totalCandidates = await candidateManagementService.getTotalCandidates();
+  } catch (e) {
+    // eslint-disable-next-line no-console
+    console.error('Failed to load total candidates:', e);
+  }
   res.render('md/md-dashboard', {
     success: req.query.success,
-    error: req.query.error
+    error: req.query.error,
+    totalCandidates
   });
 });
 router.post('/logout', (req, res) => {
@@ -62,6 +80,10 @@ router.post('/admin_logout', (req, res) => {
 });
 router.post('/admin/change-username', handleChangeUsername);
 router.post('/admin/change-password', handleChangePassword);
+router.get('/admin/admins', adminAuth, requireSuperAdmin, renderAdminUsers);
+router.post('/admin/admins/create', adminAuth, requireSuperAdmin, handleCreateAdmin);
+router.post('/admin/admins/:id/role', adminAuth, requireSuperAdmin, handleUpdateAdminRole);
+router.post('/admin/admins/:id/delete', adminAuth, requireSuperAdmin, handleDeleteAdmin);
 router.get('/signup', renderSignup);
 router.post(
   '/signup',

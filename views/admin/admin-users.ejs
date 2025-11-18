@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Users • Scout Express</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="stylesheet" href="/css/admin.css">
+  <link rel="stylesheet" href="/css/candidate-management.css">
+</head>
+<body>
+  <%- include('admin-header', { pageTitle: 'Admin Users' }) %>
+
+  <div class="admin-layout">
+    <%- include('admin-sidebar', { activePage: 'admins' }) %>
+
+    <main class="admin-main">
+      <div class="admin-content">
+        <div class="content-header">
+          <div class="page-title">Admin Users</div>
+          <form method="POST" action="/admin_logout" style="display: inline;">
+            <button type="submit" class="logout-btn">Logout</button>
+          </form>
+        </div>
+
+        <% if (typeof success !== 'undefined' && success) { %>
+          <div class="alert alert-success"><%= success %></div>
+        <% } %>
+
+        <% if (typeof error !== 'undefined' && error) { %>
+          <div class="alert alert-error"><%= error %></div>
+        <% } %>
+
+        <div class="dashboard-content">
+          <div class="settings-grid">
+            <div class="settings-section">
+              <div class="section-title">Create Admin</div>
+              <div class="section-content">
+                <form method="POST" action="/admin/admins/create">
+                  <div class="form-group">
+                    <label for="newAdminUsername">Username</label>
+                    <input type="text" id="newAdminUsername" name="username" required>
+                  </div>
+                  <div class="form-group">
+                    <label for="newAdminPassword">Password</label>
+                    <input type="password" id="newAdminPassword" name="password" required minlength="6">
+                  </div>
+                  <div class="form-group">
+                    <label for="newAdminRole">Role</label>
+                    <select id="newAdminRole" name="role" required>
+                      <option value="admin">Admin (full access)</option>
+                      <option value="viewer">Viewer (read-only)</option>
+                      <option value="super_admin">Super Admin</option>
+                    </select>
+                  </div>
+                  <button type="submit" class="settings-btn">Create Admin</button>
+                </form>
+              </div>
+            </div>
+
+            <div class="settings-section">
+              <div class="section-title">Manage Admins</div>
+              <div class="section-content">
+                <table class="admin-table" style="width: 100%; border-collapse: collapse;">
+                  <thead>
+                    <tr>
+                      <th style="text-align: left; padding: 8px; border-bottom: 1px solid #dee2e6;">ID</th>
+                      <th style="text-align: left; padding: 8px; border-bottom: 1px solid #dee2e6;">Username</th>
+                      <th style="text-align: left; padding: 8px; border-bottom: 1px solid #dee2e6;">Role</th>
+                      <th style="text-align: left; padding: 8px; border-bottom: 1px solid #dee2e6;">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <% (admins || []).forEach(function(a){ %>
+                      <tr>
+                        <td style="padding: 8px; border-bottom: 1px solid #eee;"><%= a.id %></td>
+                        <td style="padding: 8px; border-bottom: 1px solid #eee;"><%= a.username %></td>
+                        <td style="padding: 8px; border-bottom: 1px solid #eee;"><%= a.role || 'admin' %></td>
+                        <td style="padding: 8px; border-bottom: 1px solid #eee;">
+                          <form method="POST" action="/admin/admins/<%= a.id %>/role" style="display:inline-block; margin-right:10px;">
+                            <select name="role" required>
+                              <option value="admin" <%= (a.role === 'admin') ? 'selected' : '' %>>Admin</option>
+                              <option value="viewer" <%= (a.role === 'viewer') ? 'selected' : '' %>>Viewer</option>
+                              <option value="super_admin" <%= (a.role === 'super_admin') ? 'selected' : '' %>>Super Admin</option>
+                            </select>
+                            <button type="submit" class="btn btn-primary btn-sm">Update</button>
+                          </form>
+                          <form method="POST" action="/admin/admins/<%= a.id %>/delete" style="display:inline-block;" onsubmit="return confirm('Delete admin?');">
+                            <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+                          </form>
+                        </td>
+                      </tr>
+                    <% }) %>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <%- include('admin-footer') %>
+</body>
+</html>

@@ -3,6 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = require("express");
 const candidateManagementController_1 = require("../controllers/candidateManagementController");
 const noCache_1 = require("../middlewares/noCache");
+const adminRoles_1 = require("../middlewares/adminRoles");
 const router = (0, express_1.Router)();
 // Apply admin authentication to all routes
 router.use(noCache_1.adminAuth);
@@ -15,9 +16,9 @@ router.get('/:id', candidateManagementController_1.viewCandidate);
 // Edit candidate form
 router.get('/:id/edit', candidateManagementController_1.editCandidateForm);
 // Update candidate
-router.post('/:id/update', candidateManagementController_1.updateCandidate);
+router.post('/:id/update', adminRoles_1.requireAdminWrite, candidateManagementController_1.updateCandidate);
 // Update candidate status (enable/disable)
-router.put('/:id/status', candidateManagementController_1.updateCandidateStatus);
+router.put('/:id/status', adminRoles_1.requireAdminWrite, candidateManagementController_1.updateCandidateStatus);
 // Delete candidate
-router.delete('/:id', candidateManagementController_1.deleteCandidate);
+router.delete('/:id', adminRoles_1.requireAdminWrite, candidateManagementController_1.deleteCandidate);
 exports.default = router;

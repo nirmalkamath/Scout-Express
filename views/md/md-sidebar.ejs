@@ -1,33 +1,43 @@
-<!-- Sidebar -->
-      <aside class="admin-sidebar">
+<!-- Sidebar Navigation -->
+      <nav class="admin-sidebar">
         <div class="sidebar-header">
-          <h3>MD (Analytics)</h3>
+          <div class="sidebar-title">MD (Analytics)</div>
         </div>
-        <nav class="sidebar-nav">
-          <ul class="nav-list">
-            <li class="nav-item">
-              <a href="/md-dashboard" class="nav-link <%= activePage === 'dashboard' ? 'active' : '' %>">
-                📊 Dashboard
-              </a>
-            </li>
-            <li class="nav-item">
-              <a href="/md-analytics" class="nav-link <%= activePage === 'analytics' ? 'active' : '' %>">
-                📈 Analytics
-              </a>
-            </li>
-            <li class="nav-item">
-              <a href="/md-reports" class="nav-link <%= activePage === 'reports' ? 'active' : '' %>">
-                📋 Reports
-              </a>
-            </li>
-            <li class="nav-item">
-              <a href="/md-settings" class="nav-link <%= activePage === 'settings' ? 'active' : '' %>">
-                ⚙️ Settings
-              </a>
-            </li>
-          </ul>
-        </nav>
-      </aside>
+        <ul class="sidebar-menu">
+          <li class="menu-item">
+            <a href="/md-dashboard" class="menu-link <%= activePage === 'dashboard' ? 'active' : '' %>">
+              <span class="menu-icon">📊</span>
+              <span class="menu-text">Dashboard</span>
+            </a>
+          </li>
+          <li class="menu-item">
+            <a href="/md-analytics" class="menu-link <%= activePage === 'analytics' ? 'active' : '' %>">
+              <span class="menu-icon">📈</span>
+              <span class="menu-text">Analytics</span>
+            </a>
+          </li>
+          <li class="menu-item">
+            <a href="/md-reports" class="menu-link <%= activePage === 'reports' ? 'active' : '' %>">
+              <span class="menu-icon">📋</span>
+              <span class="menu-text">Reports</span>
+            </a>
+          </li>
+          <li class="menu-item">
+            <a href="/md-settings" class="menu-link <%= activePage === 'settings' ? 'active' : '' %>">
+              <span class="menu-icon">⚙️</span>
+              <span class="menu-text">Settings</span>
+            </a>
+          </li>
+          <li class="menu-item">
+            <form method="POST" action="/logout" style="display: block;">
+              <button type="submit" class="menu-link" style="background: none; border: none; width: 100%; text-align: left; cursor: pointer;">
+                <span class="menu-icon">🚪</span>
+                <span class="menu-text">Logout</span>
+              </button>
+            </form>
+          </li>
+        </ul>
+      </nav>
 
       <!-- Main Content Area -->
       <div class="admin-main-content">
