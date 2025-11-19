@@ -3,6 +3,7 @@ import { Router } from 'express';
 import { getDatabaseHealth } from '../controllers/healthController';
 import { handleLogin, handleAdminLogin, handleSignup, renderLogin, renderSignup } from '../controllers/authController';
 import { handleMDLogin } from '../controllers/mdAuthController';
+import { renderMDSettings, handleMDChangeUsername, handleMDChangePassword } from '../controllers/mdController';
 import { handleChangeUsername, handleChangePassword, renderAdminUsers, handleCreateAdmin, handleUpdateAdminRole, handleDeleteAdmin } from '../controllers/adminController';
 import { getAdminDetails } from '../services/adminService';
 import { candidateManagementService } from '../services/candidateManagementService';
@@ -62,6 +63,9 @@ router.get('/md-dashboard', mdAuth, async (req, res) => {
     totalCandidates
   });
 });
+router.get('/md-settings', mdAuth, renderMDSettings);
+router.post('/md/change-username', mdAuth, handleMDChangeUsername);
+router.post('/md/change-password', mdAuth, handleMDChangePassword);
 router.post('/logout', (req, res) => {
   req.session.destroy((err) => {
     if (err) {
@@ -76,6 +80,14 @@ router.post('/admin_logout', (req, res) => {
       console.error('Logout error:', err);
     }
     res.redirect('/admin-login');
+  });
+});
+router.post('/md_logout', (req, res) => {
+  req.session.destroy((err) => {
+    if (err) {
+      console.error('Logout error:', err);
+    }
+    res.redirect('/md-login');
   });
 });
 router.post('/admin/change-username', handleChangeUsername);

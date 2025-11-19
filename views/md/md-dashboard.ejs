@@ -2,7 +2,7 @@
 
         <div class="content-header">
           <div class="page-title">MD Dashboard</div>
-          <form method="POST" action="/logout" style="display: inline;">
+          <form method="POST" action="/md_logout" style="display: inline;">
             <button type="submit" class="logout-btn">Logout</button>
           </form>
         </div>
@@ -21,33 +21,5 @@
               </div>
             </div>
           </div>
-
-          <div class="dashboard-grid">
-            <div class="dashboard-card">
-              <div class="card-title">📊 Analytics Overview</div>
-              <div class="card-content">
-                <p>View comprehensive analytics and insights</p>
-                <a href="/md-analytics" class="card-link">View Analytics</a>
-              </div>
-            </div>
-
-            <div class="dashboard-card">
-              <div class="card-title">📋 Reports</div>
-              <div class="card-content">
-                <p>Generate and download detailed reports</p>
-                <a href="/md-reports" class="card-link">Manage Reports</a>
-              </div>
-            </div>
-
-            <div class="dashboard-card">
-              <div class="card-title">⚙️ Settings</div>
-              <div class="card-content">
-                <p>Configure MD dashboard preferences</p>
-                <a href="/md-settings" class="card-link">Manage Settings</a>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
 
 <%- include('md-footer') %>

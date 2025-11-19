@@ -8,6 +8,7 @@ const express_1 = require("express");
 const healthController_1 = require("../controllers/healthController");
 const authController_1 = require("../controllers/authController");
 const mdAuthController_1 = require("../controllers/mdAuthController");
+const mdController_1 = require("../controllers/mdController");
 const adminController_1 = require("../controllers/adminController");
 const adminService_1 = require("../services/adminService");
 const candidateManagementService_1 = require("../services/candidateManagementService");
@@ -67,6 +68,9 @@ router.get('/md-dashboard', mdAuth_1.mdAuth, async (req, res) => {
         totalCandidates
     });
 });
+router.get('/md-settings', mdAuth_1.mdAuth, mdController_1.renderMDSettings);
+router.post('/md/change-username', mdAuth_1.mdAuth, mdController_1.handleMDChangeUsername);
+router.post('/md/change-password', mdAuth_1.mdAuth, mdController_1.handleMDChangePassword);
 router.post('/logout', (req, res) => {
     req.session.destroy((err) => {
         if (err) {
@@ -81,6 +85,14 @@ router.post('/admin_logout', (req, res) => {
             console.error('Logout error:', err);
         }
         res.redirect('/admin-login');
+    });
+});
+router.post('/md_logout', (req, res) => {
+    req.session.destroy((err) => {
+        if (err) {
+            console.error('Logout error:', err);
+        }
+        res.redirect('/md-login');
     });
 });
 router.post('/admin/change-username', adminController_1.handleChangeUsername);
